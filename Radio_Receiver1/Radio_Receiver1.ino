@@ -10,7 +10,7 @@
 
 #include <SoftwareSerial.h>
 #include <SPI.h>
-#include <nRF24L01.h>
+//#include <nRF24L01.h>
 #include <RF24.h>
 
 //for nrf to work, pin 10 must be high if it is not used as an nrf connecton
@@ -45,8 +45,8 @@ void setup()
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   Serial.begin(9600);
 
-  //radio.setChannel(0x66);              //ensure it matches the target host  radio.setChannel(0x66);
-  // radio.setDataRate(RF24_1MBPS);      // set RF datarate
+  //radio.setChannel(0x02);              //ensure it matches the target host  radio.setChannel(0x66);
+  //radio.setDataRate(RF24_250KBPS);      // set RF datarate
   radio.begin();
 
   // consider setting the radio channel to use
