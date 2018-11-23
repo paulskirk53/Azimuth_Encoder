@@ -43,25 +43,21 @@ double Azimuth;                                         // to be returned when a
 void setup()
 {
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
+  digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(9600);
 
-  //radio.setChannel(0x02);              //ensure it matches the target host  radio.setChannel(0x66);
-  //radio.setDataRate(RF24_250KBPS);      // set RF datarate
+
   radio.begin();
 
-  // consider setting the radio channel to use
 
-
-  radio.openReadingPipe(1, address);    // the 1st parameter can be any number 0 to 5
-                                        // but 0 is used for write apparently
-
-  // enable ack payload - slaves reply with data using this feature
-  radio.enableAckPayload();
-
+  radio.setChannel(100);
+  radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
+  radio.setDataRate(RF24_250KBPS);
   radio.setPALevel(RF24_PA_MIN);
   radio.enableDynamicPayloads();
+  radio.openReadingPipe(1, address);    // the 1st parameter can be any number 0 to 5
   radio.startListening();
-  //radio.writeAckPayload(1, &message, sizeof(message));
+
 
   //encoder:
   pinMode(A_PHASE, INPUT);
@@ -81,8 +77,8 @@ void loop()
   {
     encoder();
     message = Azimuth;
-    
- 
+
+
   }
 
 
