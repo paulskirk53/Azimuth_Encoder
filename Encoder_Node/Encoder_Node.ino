@@ -53,6 +53,7 @@ void setup()
   radio.setDataRate(RF24_250KBPS);
   radio.setPALevel(RF24_PA_MIN);
   radio.enableDynamicPayloads();
+  radio.openWritingPipe(masterNodeaddress);
   radio.openReadingPipe(1, thisNodeaddress);    // "000001" the address the master writes to when communicating with this encoder node
   radio.startListening();
 
@@ -70,8 +71,8 @@ void setup()
 
 void loop()
 {
-  radio.startListening();
-  delay(20);                    // just in case hardware needs time before next instuction exec
+  //radio.startListening();
+  // delay(20);                    // just in case hardware needs time before next instuction exec
 
   while (!radio.available())
   {
@@ -85,19 +86,23 @@ void loop()
   if (radio.available())
   {
     char text[32] = "";             // used to store what the master node sent e.g AZ hash SA hash
-    // not required now radio.writeAckPayload(1, &message, sizeof(message));
+
     radio.read(&text, sizeof(text));
+
     if (text[0] == 'A' && text[1] == 'Z' && text[2] == '#')
     {
+
       radio.stopListening();
-      radio.openWritingPipe(masterNodeaddress);
       radio.write(&message, sizeof(message));
+      radio.startListening();
     }
+    
     Serial.print("The text received from Mster was: ");
     Serial.println(text);
     Serial.print("the Azimuth value returned to the master is ");
     Serial.println(message);
     Serial.println("--------------------------------------");
+    
   }  //endif radio available
 
 }  // end void loop
