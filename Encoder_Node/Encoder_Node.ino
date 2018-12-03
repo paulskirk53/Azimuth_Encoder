@@ -27,8 +27,8 @@
 RF24 radio(7, 8); // CE, CSN
 
 
-const byte thisNodeaddress[6] = "00001";            // 00001 the address of this arduino board/ transmitter
-const byte masterNodeaddress[6] = "00000";          // the address of the Master
+const byte thisNodeaddress[6] = "encodr";            // 00001 the address of this arduino board/ transmitter
+const byte masterNodeaddress[6] = "mastr";          // the address of the Master
 char message[8] = ""  ;                              // this data type must be used for radio.write
 
 //encoder:
