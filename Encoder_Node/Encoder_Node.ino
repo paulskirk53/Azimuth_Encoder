@@ -51,7 +51,7 @@ void setup()
   radio.setChannel(100);
   radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
   radio.setDataRate(RF24_250KBPS);
-  radio.setPALevel(RF24_PA_MIN);
+  radio.setPALevel(RF24_PA_LOW);
   radio.enableDynamicPayloads();
   radio.openWritingPipe(masterNodeaddress);
   radio.openReadingPipe(1, thisNodeaddress);    // "000001" the address the master writes to when communicating with this encoder node
