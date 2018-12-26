@@ -1,6 +1,7 @@
 
 
 
+
 //  Name:       Two_Way_Encoder
 //   Created:	28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
@@ -12,6 +13,7 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
+#include <LiquidCrystal.h>
 
 //for nrf to work, pin 10 must be high if it is not used as an nrf connecton
 #define PIN10  10
@@ -26,6 +28,9 @@
 
 RF24 radio(7, 8); // CE, CSN
 
+//liquid crystal two lines below
+const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22; 
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 const byte thisNodeaddress[6] = "encodr";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
@@ -41,11 +46,17 @@ String receivedData = "";
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 
 
+
+
 void setup()
 {
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(9600);
+
+    // set up the LCD's number of columns and rows:
+    lcd.begin(16, 2);
+
 
   radio.begin();
   radio.setChannel(100);
@@ -81,7 +92,12 @@ void loop()
 
 
   }
-
+    // set the cursor to column 0, line 1
+    // (note: line 1 is the second row, since counting begins with 0):
+    lcd.setCursor(0, 1);
+    lcd.print("Azimuth: ");
+	lcd.setCursor(9, 1);
+	lcd.print(message);
 
   if (radio.available())
   {
