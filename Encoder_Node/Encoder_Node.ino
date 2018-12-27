@@ -43,6 +43,7 @@ long int flag_B = 0;
 
 //General
 String receivedData = "";
+String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 
 
@@ -74,8 +75,7 @@ void setup()
   pinMode(B_PHASE, INPUT);
   Serial.begin(9600);   //Serial Port Baudrate: 9600
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
-
-
+  
 
 }    // end setup
 
@@ -92,11 +92,13 @@ void loop()
 
 
   }
+
+    lcdazimuth= String(message);
     // set the cursor to column 0, line 1
     // (note: line 1 is the second row, since counting begins with 0):
     lcd.setCursor(0, 1);
     lcd.print("Azimuth: ");
-	lcd.setCursor(9, 1);
+	lcd.setCursor(10, 1);
 	lcd.print(message);
 
   if (radio.available())
