@@ -89,17 +89,17 @@ void loop()
   {
     encoder();
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp
+	    lcdazimuth= String(message);
+	    // set the cursor to column 0, line 0
+	    // (note: line 1 is the second row, since counting begins with 0):
+	    lcd.setCursor(0, 0);
+	    lcd.print("Actual Azimuth : ");
+	    lcd.setCursor(0, 1);
+	    lcd.print(lcdazimuth);
 
 
   }
 
-    lcdazimuth= String(message);
-    // set the cursor to column 0, line 1
-    // (note: line 1 is the second row, since counting begins with 0):
-    lcd.setCursor(0, 1);
-    lcd.print("Azimuth: ");
-	lcd.setCursor(10, 1);
-	lcd.print(message);
 
   if (radio.available())
   {
