@@ -115,11 +115,11 @@ void loop()
       radio.startListening();
     }
     
-    Serial.print("The text received from Mster was: ");
-    Serial.println(text);
-    Serial.print("the Azimuth value returned to the master is ");
-    Serial.println(message);
-    Serial.println("--------------------------------------");
+  // Serial.print("The text received from Master was: ");
+  // Serial.println(text);
+  // Serial.print("the Azimuth value returned to the master is ");
+  // Serial.println(message);
+  // Serial.println("--------------------------------------");
     
   }  //endif radio available
 
