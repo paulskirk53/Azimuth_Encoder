@@ -1,7 +1,4 @@
 
-
-
-
 //  Name:       Two_Way_Encoder
 //   Created:	28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
@@ -29,12 +26,12 @@
 RF24 radio(7, 8); // CE, CSN
 
 //liquid crystal two lines below
-const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22; 
+const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 const byte thisNodeaddress[6] = "encodr";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
-char message[8] = ""  ;                              // this data type must be used for radio.write
+char message[9] = ""  ;                              // this data type must be used for radio.write
 
 //encoder:
 volatile long int A_Counter = 10413 / 2;  // this is the mid point of the encoder travel and equates to South -
@@ -55,8 +52,8 @@ void setup()
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(9600);
 
-    // set up the LCD's number of columns and rows:
-    lcd.begin(16, 2);
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
 
 
   radio.begin();
@@ -75,7 +72,7 @@ void setup()
   pinMode(B_PHASE, INPUT);
   Serial.begin(9600);   //Serial Port Baudrate: 9600
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
-  
+
 
 }    // end setup
 
@@ -89,13 +86,14 @@ void loop()
   {
     encoder();
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp
-	    lcdazimuth= String(message);
-	    // set the cursor to column 0, line 0
-	    // (note: line 1 is the second row, since counting begins with 0):
-	    lcd.setCursor(0, 0);
-	    lcd.print("Actual Azimuth : ");
-	    lcd.setCursor(0, 1);
-	    lcd.print(lcdazimuth);
+
+    lcdazimuth = String(message);
+    // set the cursor to column 0, line 0
+    // (note: line 1 is the second row, since counting begins with 0):
+    lcd.setCursor(0, 0);
+    lcd.print("Actual Azimuth : ");
+    lcd.setCursor(0, 1);
+    lcd.print(lcdazimuth);
 
 
   }
@@ -109,18 +107,18 @@ void loop()
 
     if (text[0] == 'A' && text[1] == 'Z' && text[2] == '#')
     {
-
+      //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
       radio.write(&message, sizeof(message));
       radio.startListening();
     }
-    
-  // Serial.print("The text received from Master was: ");
-  // Serial.println(text);
-  // Serial.print("the Azimuth value returned to the master is ");
-  // Serial.println(message);
-  // Serial.println("--------------------------------------");
-    
+
+    // Serial.print("The text received from Master was: ");
+    // Serial.println(text);
+    // Serial.print("the Azimuth value returned to the master is ");
+    // Serial.println(message);
+    // Serial.println("--------------------------------------");
+
   }  //endif radio available
 
 }  // end void loop
