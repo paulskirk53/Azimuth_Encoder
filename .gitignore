@@ -11,6 +11,7 @@
 *.o
 *.so
 *.hex
+*.atsuo
 
 # Packages #
 ############
