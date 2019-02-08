@@ -2,7 +2,7 @@
 //  Name:       Two_Way_Encoder
 //   Created:	28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
-
+// Modified  to be modulo 360 by PK on 8-2-19
 // Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
 
 
@@ -85,15 +85,15 @@ void loop()
   while (!radio.available())
   {
     encoder();
-    dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp
+    dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
 
-    lcdazimuth = String(message);
+    // lcdazimuth = String(message);
     // set the cursor to column 0, line 0
     // (note: line 1 is the second row, since counting begins with 0):
     lcd.setCursor(0, 0);
     lcd.print("Actual Azimuth : ");
     lcd.setCursor(0, 1);
-    lcd.print(lcdazimuth);
+    lcd.print(Azimuth);
 
 
   }
@@ -129,12 +129,12 @@ void encoder()
 
   if (A_Counter < 0)
   {
-    A_Counter = 0;     // set the counter floor value
+    A_Counter =  A_Counter + 10413;     // set the counter floor value
   }
 
   if (A_Counter > 10413)   // set the counter ceiling value
   {
-    A_Counter = 10413;
+    A_Counter = A_Counter -  10413;
   }
 
   Azimuth = float(A_Counter) / 28.925;    // 28.925 is 10413 (counts for 26 revs) / 360 (degrees)
