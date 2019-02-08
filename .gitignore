@@ -1,6 +1,9 @@
 # directories #
 /Debug/
 /Release/
+/.vs/
+/_vm/
+
 
 # Compiled source #
 ###################
@@ -11,7 +14,9 @@
 *.o
 *.so
 *.hex
-*.atsuo
+*.elf
+*.xml
+*.buildinfo
 
 # Packages #
 ############

@@ -1,5 +1,8 @@
 # directories #
 /Debug/
+/Release/
+/.vs/
+/_vm/
 
 
 # Compiled source #
