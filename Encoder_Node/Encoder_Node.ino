@@ -50,7 +50,7 @@ void setup()
 {
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
