@@ -73,7 +73,9 @@ void setup()
   Serial.begin(9600);   //Serial Port Baudrate: 9600
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
 
-
+      lcd.setCursor(0, 0);
+      lcd.print("Azimuth MCU Ready");
+	  delay(5000);
 }    // end setup
 
 
