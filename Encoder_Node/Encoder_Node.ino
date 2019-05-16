@@ -32,6 +32,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const byte thisNodeaddress[6] = "encodr";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
 char message[9] = ""  ;                              // this data type must be used for radio.write
+char commstest[17] = "Encoder online   ";
 
 //encoder:
 volatile long int A_Counter = 10413 / 2;  // this is the mid point of the encoder travel and equates to South -
@@ -92,10 +93,10 @@ void loop()
     // lcdazimuth = String(message);
     // set the cursor to column 0, line 0
     // (note: line 1 is the second row, since counting begins with 0):
-    lcd.setCursor(0, 0);
-    lcd.print("Actual Azimuth : ");
-    lcd.setCursor(0, 1);
-    lcd.print(Azimuth);
+    lcdprint(0,0, "Actual Azimuth:");
+	
+    lcdprint(16,0, String(Azimuth,0));
+   
 
 
   }
@@ -115,6 +116,18 @@ void loop()
       radio.startListening();
     }
 
+	//new code
+	    if (text[0] == 'T' && text[1] == 'S' && text[2] == 'T' && text[3]=='#')
+	    {
+		    //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
+		    radio.stopListening();
+		    radio.write(&commstest, sizeof(commstest));
+		    radio.startListening();
+			lcdprint(0,1, "Responding");
+	    }
+
+
+	//end new
     // Serial.print("The text received from Master was: ");
     // Serial.println(text);
     // Serial.print("the Azimuth value returned to the master is ");
@@ -182,3 +195,11 @@ void interrupt()               // Interrupt function
 
   }  // end else clause
 }  // end void interrupt
+
+void lcdprint(int col, int row, String mess)
+{
+	//lcd.clear();
+	lcd.setCursor(col, row);
+	lcd.print(mess);
+
+}

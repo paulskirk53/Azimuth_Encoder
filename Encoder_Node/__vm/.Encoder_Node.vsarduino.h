@@ -21,6 +21,7 @@
 //
 void encoder();
 void interrupt();
+void lcdprint(int col, int row, String mess);
 
 #include "pins_arduino.h" 
 #include "arduino.h"
