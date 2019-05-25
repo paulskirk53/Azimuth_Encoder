@@ -4,7 +4,11 @@
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
 // Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
-
+//there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
+// in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
+// from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
+//so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
+//In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
 
 #include <SoftwareSerial.h>
 #include <SPI.h>
@@ -35,8 +39,9 @@ char message[9] = ""  ;                              // this data type must be u
 char commstest[17] = "Encoder online   ";
 
 //encoder:
-volatile long int A_Counter = 10413 / 2;  // this is the mid point of the encoder travel and equates to South -
-// the starting point of the dome must be facing south
+volatile long int A_Counter = 0;  // this is the position of due north
+// the starting point of the dome must be facing north
+
 long int flag_B = 0;
 
 //General
@@ -150,15 +155,15 @@ void encoder()
 
   if (A_Counter < 0)
   {
-    A_Counter =  A_Counter + 10413;     // set the counter floor value
+    A_Counter =  A_Counter + 10253;     // set the counter floor value
   }
 
-  if (A_Counter > 10413)   // set the counter ceiling value
+  if (A_Counter > 10253)   // set the counter ceiling value
   {
-    A_Counter = A_Counter -  10413;
+    A_Counter = A_Counter -  10253;
   }
 
-  Azimuth = float(A_Counter) / 28.925;    // 28.925 is 10413 (counts for 26 revs) / 360 (degrees)
+  Azimuth = float(A_Counter) / 28.481;    // 28.481 is 10253 (counts for 25.6 revs) / 360 (degrees)
   // i.e number of ticks per degree
 
   // some error checking
