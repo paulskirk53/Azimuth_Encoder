@@ -100,7 +100,7 @@ void loop()
     // (note: line 1 is the second row, since counting begins with 0):
     lcdprint(0, 0, "Actual Azimuth: ");
 
-    lcdprint(0, 1, String(Azimuth, 0));
+    lcdprint(0, 1, String(Azimuth, 2));
 
 
 
