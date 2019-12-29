@@ -43,8 +43,8 @@ char message[9] = ""  ;                              // this data type must be u
 char commstest[17] = "Encoder online   ";
 
 //encoder:
-volatile long int A_Counter = 8000;  // this is the position of due north
-// the starting point of the dome must be facing north
+volatile long int A_Counter = 10253*0.75;  // this is the position of due west
+
 
 long int flag_B = 0;
 
