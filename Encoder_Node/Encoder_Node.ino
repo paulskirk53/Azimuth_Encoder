@@ -10,6 +10,10 @@
 //so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
 //In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
 
+
+//NB - start this MCU before the master radio so it is ready waiting for the comms check
+// Dec 19 implemented  write counter to show how many radio writes of Azimuth are actually sent
+
 #include <SoftwareSerial.h>
 #include <SPI.h>
 #include <nRF24L01.h>
@@ -39,7 +43,7 @@ char message[9] = ""  ;                              // this data type must be u
 char commstest[17] = "Encoder online   ";
 
 //encoder:
-volatile long int A_Counter = 0;  // this is the position of due north
+volatile long int A_Counter = 8000;  // this is the position of due north
 // the starting point of the dome must be facing north
 
 long int flag_B = 0;
@@ -48,7 +52,7 @@ long int flag_B = 0;
 String receivedData = "";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
-
+long   Sendcount = 0;
 
 
 
@@ -80,8 +84,11 @@ void setup()
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
 
   lcd.setCursor(0, 0);
-  lcd.print("Azimuth MCU OK  ");
-  delay(5000);
+  lcd.print("Azimuth MCU OK  ");                 //16 char display
+  delay(4000);                                   //so the message above can be seen before it is overwritten
+  // lcdprint(0, 0, "If comms work  a");
+  // lcdprint(0, 1, "counter shows.  ");
+  delay(4000);                                   //so the message above can be seen before it is overwritten
 }    // end setup
 
 
@@ -98,15 +105,20 @@ void loop()
     // lcdazimuth = String(message);
     // set the cursor to column 0, line 0
     // (note: line 1 is the second row, since counting begins with 0):
-    lcdprint(0, 0, "Actual Azimuth: ");
+    lcdprint(0, 0, "                ");
+    lcdprint(0, 1, "                ");
+    lcdprint(0, 0, "Call count: " + String(Sendcount));
 
-    lcdprint(0, 1, String(Azimuth, 2));
+    lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0));
 
 
 
   }
 
-
+  if (Sendcount > 999)  //reset the radio send counts to zero
+  {
+    Sendcount = 0;
+  }
   if (radio.available())
   {
     char text[32] = "";             // used to store what the master node sent e.g AZ hash SA hash
@@ -119,10 +131,11 @@ void loop()
       radio.stopListening();
       radio.write(&message, sizeof(message));
       radio.startListening();
+      Sendcount++;
     }
 
     //new code
-    if (text[0] == 'T' && text[1] == 'S' && text[2] == 'T' && text[3] == '#')
+    if ((text[0] == 'T') && (text[1] == 'S') && (text[2] == 'T') && (text[3] == '#'))
     {
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
@@ -132,9 +145,10 @@ void loop()
       lcdprint(0, 0, "                ");
       lcdprint(0, 0, "Responding to   ");
       lcdprint(0, 1, "Comms check...  ");
-      delay(2000);
+      delay(5000);
+      lcdprint(0, 0, "                ");
       lcdprint(0, 1, "                ");
-
+      Sendcount++;
     }
 
 
