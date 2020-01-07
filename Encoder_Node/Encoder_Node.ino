@@ -43,7 +43,7 @@ char message[9] = ""  ;                              // this data type must be u
 char commstest[17] = "Encoder online   ";
 
 //encoder:
-volatile long int A_Counter = 10253*0.75;  // this is the position of due west
+volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 
 
 long int flag_B = 0;
@@ -97,7 +97,7 @@ void loop()
   //radio.startListening();
   // delay(20);                    // just in case hardware needs time before next instuction exec
 
-  while (!radio.available())
+  while (    (!radio.available()) && !(Serial.available() > 0)   )
   {
     encoder();
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
@@ -160,6 +160,33 @@ void loop()
     // Serial.println("--------------------------------------");
 
   }  //endif radio available
+
+
+  if (Serial.available() > 0)
+  {
+
+    String RecievedData = "";
+
+    RecievedData = Serial.readStringUntil('#');
+
+    if (receivedData.indexOf("AZ", 0) > -1) //
+    {
+      Serial.print(String(Azimuth) +"#");
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 }  // end void loop
 
