@@ -3,12 +3,14 @@
 //   Created:	28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
+// Modified to respond to USB Serial Tx on 8-1-2020
 // Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
 //there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
 //so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
 //In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
+//North = 0, East = 10253/4, South = 10253/2 East = 10253*3/4
 
 
 //NB - start this MCU before the master radio so it is ready waiting for the comms check
@@ -170,8 +172,8 @@ void loop()
     String ReceivedData = "";
 
     ReceivedData = Serial.readStringUntil('#');
-    Serial.print("received ");
-    Serial.println(ReceivedData );
+   // Serial.print("received ");
+   // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1) //
     {
       Serial.print(String(Azimuth) + "#");
