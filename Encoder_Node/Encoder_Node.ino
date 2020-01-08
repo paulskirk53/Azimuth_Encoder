@@ -49,7 +49,7 @@ volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 long int flag_B = 0;
 
 //General
-String receivedData = "";
+//String receivedData = "";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 long   Sendcount = 0;
@@ -65,7 +65,7 @@ void setup()
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-
+  //Serial.print ("before radio begin");
   radio.begin();
   radio.setChannel(100);
   radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
@@ -75,12 +75,12 @@ void setup()
   radio.openWritingPipe(masterNodeaddress);
   radio.openReadingPipe(1, thisNodeaddress);    // "000001" the address the master writes to when communicating with this encoder node
   radio.startListening();
-
+  //Serial.print ("after radio startlistening");
 
   //encoder:
   pinMode(A_PHASE, INPUT);
   pinMode(B_PHASE, INPUT);
-  Serial.begin(9600);   //Serial Port Baudrate: 9600
+
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
 
   lcd.setCursor(0, 0);
@@ -88,18 +88,20 @@ void setup()
   delay(4000);                                   //so the message above can be seen before it is overwritten
   // lcdprint(0, 0, "If comms work  a");
   // lcdprint(0, 1, "counter shows.  ");
-  delay(4000);                                   //so the message above can be seen before it is overwritten
+  // delay(4000);                                   //so the message above can be seen before it is overwritten
 }    // end setup
 
 
 void loop()
 {
+  //Serial.print ("in void loop");
   //radio.startListening();
   // delay(20);                    // just in case hardware needs time before next instuction exec
 
   while (    (!radio.available()) && !(Serial.available() > 0)   )
   {
     encoder();
+    //Serial.print ("in here");
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
 
     // lcdazimuth = String(message);
@@ -165,27 +167,17 @@ void loop()
   if (Serial.available() > 0)
   {
 
-    String RecievedData = "";
+    String ReceivedData = "";
 
-    RecievedData = Serial.readStringUntil('#');
-
-    if (receivedData.indexOf("AZ", 0) > -1) //
+    ReceivedData = Serial.readStringUntil('#');
+    Serial.print("received ");
+    Serial.println(ReceivedData );
+    if (ReceivedData.indexOf("AZ", 0) > -1) //
     {
-      Serial.print(String(Azimuth) +"#");
+      Serial.print(String(Azimuth) + "#");
     }
 
   }
-
-
-
-
-
-
-
-
-
-
-
 
 
 }  // end void loop
@@ -222,7 +214,7 @@ void encoder()
 
   // Serial1.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
   // Serial1.println("#");               // print the string terminator
-  receivedData = "";
+ // receivedData = "";
 
 }
 
