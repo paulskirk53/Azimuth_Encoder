@@ -214,7 +214,7 @@ void encoder()
 
   // Serial1.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
   // Serial1.println("#");               // print the string terminator
- // receivedData = "";
+  // receivedData = "";
 
 }
 
