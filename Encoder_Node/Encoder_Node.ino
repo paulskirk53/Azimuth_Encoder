@@ -1,6 +1,6 @@
 
 //  Name:       Two_Way_Encoder
-//   Created:	28/11/2018 08:46:37
+//   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
 // Modified to respond to Serial1 Tx on 8-1-2020
@@ -13,7 +13,7 @@
 //North = 0, East = 10253/4, South = 10253/2 East = 10253*3/4
 
 
-//NB - start this MCU before the master radio so it is ready waiting for the comms check
+// NB - start this MCU before the master radio so it is ready waiting for the comms check
 // Dec 19 implemented  write counter to show how many radio writes of Azimuth are actually sent
 
 
@@ -39,10 +39,10 @@ RF24 radio(7, 8); // CE, CSN
 const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-const byte thisNodeaddress[6] = "encodr";            // 00001 the address of this arduino board/ transmitter
+const byte thisNodeaddress[6] =   "encod";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
 char message[9] = ""  ;                              // this data type must be used for radio.write
-char commstest[17] = "Encoder online   ";
+char commstest[17] = "Encoder online  ";
 
 //encoder:
 volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
@@ -114,8 +114,8 @@ void loop()
     lcdprint(0, 1, blankline);
     lcdprint(0, 0, "rad:step " + String(Sendcount));
 
-    lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0));
-
+    lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
+    delay(200);
 
 
   }
@@ -146,13 +146,13 @@ void loop()
       radio.stopListening();
       radio.write(&commstest, sizeof(commstest));
       radio.startListening();
-      lcdprint(0, 1, "                ");
-      lcdprint(0, 0, "                ");
+      lcdprint(0, 1, blankline);
+      lcdprint(0, 0, blankline);
       lcdprint(0, 0, "Responding to   ");
       lcdprint(0, 1, "Comms check...  ");
       delay(5000);
-      lcdprint(0, 0, "                ");
-      lcdprint(0, 1, "                ");
+      lcdprint(0, 0, blankline);
+      lcdprint(0, 1, blankline);
       Sendcount++;
     }
 
@@ -179,15 +179,12 @@ void loop()
     {
       azcount++;
       Serial1.print(String(Azimuth) + "#");
-      lcdprint(13, 0, String(azcount));
+      lcdprint(13, 0, ":" + String(azcount));
     }
     if (azcount > 999)
     {
       azcount = 0;
     }
-
-
-
   }
 
 
@@ -227,7 +224,7 @@ void encoder()
   // Serial1.println("#");               // print the string terminator
   // receivedData = "";
 
-}
+}  // end void encoder
 
 //interrupt used by the encoder:
 void interrupt()               // Interrupt function
@@ -251,7 +248,7 @@ void interrupt()               // Interrupt function
   }  // end else clause
 }  // end void interrupt
 
-void lcdprint(int col, int row, String mess)
+void lcdprint(int col, int row, String mess )
 {
   //lcd.clear();
   lcd.setCursor(col, row);
