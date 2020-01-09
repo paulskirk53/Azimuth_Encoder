@@ -3,7 +3,7 @@
 //   Created:	28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
-// Modified to respond to USB Serial Tx on 8-1-2020
+// Modified to respond to Serial1 Tx on 8-1-2020
 // Library: TMRh20/RF24, https://github.com/tmrh20/RF24/
 //there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
@@ -16,7 +16,7 @@
 //NB - start this MCU before the master radio so it is ready waiting for the comms check
 // Dec 19 implemented  write counter to show how many radio writes of Azimuth are actually sent
 
-#include <SoftwareSerial.h>
+
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
@@ -51,9 +51,10 @@ volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 long int flag_B = 0;
 
 //General
-//String receivedData = "";
+String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
+double azcount;
 long   Sendcount = 0;
 
 
@@ -63,6 +64,7 @@ void setup()
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(115200);
+  Serial1.begin(115200);
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
@@ -88,30 +90,29 @@ void setup()
   lcd.setCursor(0, 0);
   lcd.print("Azimuth MCU OK  ");                 //16 char display
   delay(4000);                                   //so the message above can be seen before it is overwritten
-  // lcdprint(0, 0, "If comms work  a");
-  // lcdprint(0, 1, "counter shows.  ");
-  // delay(4000);                                   //so the message above can be seen before it is overwritten
+  lcdprint(0, 0, "If comms work  a");
+  lcdprint(0, 1, "counter shows.  ");
+  delay(2000);                                   //so the message above can be seen before it is overwritten
+
+  azcount = 0;
+
 }    // end setup
 
 
 void loop()
 {
-  //Serial.print ("in void loop");
-  //radio.startListening();
-  // delay(20);                    // just in case hardware needs time before next instuction exec
-
-  while (    (!radio.available()) && !(Serial.available() > 0)   )
+  while (    (!radio.available()) && !(Serial1.available() > 0)   )
   {
     encoder();
     //Serial.print ("in here");
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
 
-    // lcdazimuth = String(message);
+
     // set the cursor to column 0, line 0
     // (note: line 1 is the second row, since counting begins with 0):
-    lcdprint(0, 0, "                ");
-    lcdprint(0, 1, "                ");
-    lcdprint(0, 0, "Call count: " + String(Sendcount));
+    lcdprint(0, 0, blankline);
+    lcdprint(0, 1, blankline);
+    lcdprint(0, 0, "rad:step " + String(Sendcount));
 
     lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0));
 
@@ -166,18 +167,26 @@ void loop()
   }  //endif radio available
 
 
-  if (Serial.available() > 0)
+  if (Serial1.available() > 0)
   {
 
     String ReceivedData = "";
 
-    ReceivedData = Serial.readStringUntil('#');
-   // Serial.print("received ");
-   // Serial.println(ReceivedData );
+    ReceivedData = Serial1.readStringUntil('#');
+    // Serial.print("received ");
+    // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1) //
     {
-      Serial.print(String(Azimuth) + "#");
+      azcount++;
+      Serial1.print(String(Azimuth) + "#");
+      lcdprint(13, 0, String(azcount));
     }
+    if (azcount > 999)
+    {
+      azcount = 0;
+    }
+
+
 
   }
 
