@@ -208,9 +208,9 @@ void encoder()
   // i.e number of ticks per degree
 
   // some error checking
-  if (Azimuth < 0)
+  if (Azimuth < 1)
   {
-    Azimuth = 0.0;
+    Azimuth = 1.0;
   }
 
   if (Azimuth > 360.0)
