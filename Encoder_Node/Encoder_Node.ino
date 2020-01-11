@@ -1,4 +1,4 @@
-
+//Version 1 - change the variable too version number introduced Jan 2020
 //  Name:       Two_Way_Encoder
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
@@ -51,6 +51,7 @@ volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 long int flag_B = 0;
 
 //General
+String pkversion = "1.0";
 String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
@@ -63,8 +64,8 @@ void setup()
 {
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
-  Serial.begin(115200);
-  Serial1.begin(115200);
+  Serial.begin(19200);
+  Serial1.begin(19200);
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
@@ -88,7 +89,7 @@ void setup()
   attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
 
   lcd.setCursor(0, 0);
-  lcd.print("Azimuth MCU OK  ");                 //16 char display
+  lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   delay(4000);                                   //so the message above can be seen before it is overwritten
   lcdprint(0, 0, "If comms work  a");
   lcdprint(0, 1, "counter shows.  ");
