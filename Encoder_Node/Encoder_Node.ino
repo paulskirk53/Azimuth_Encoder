@@ -1,4 +1,4 @@
-//Version 1 - change the variable too version number introduced Jan 2020
+//Version 1.1 - change the variable too version number introduced Jan 2020
 //  Name:       Two_Way_Encoder
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
@@ -51,11 +51,11 @@ volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 long int flag_B = 0;
 
 //General
-String pkversion = "1.0";
+String pkversion = "1.1";
 String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
-double azcount;
+long azcount;
 long   Sendcount = 0;
 
 
@@ -113,7 +113,7 @@ void loop()
     // (note: line 1 is the second row, since counting begins with 0):
     lcdprint(0, 0, blankline);
     lcdprint(0, 1, blankline);
-    lcdprint(0, 0, "rad:step " + String(Sendcount));
+    lcdprint(0, 0, "rad:step " + String(Sendcount) +":" );
 
     lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
     delay(200);
@@ -180,7 +180,7 @@ void loop()
     {
       azcount++;
       Serial1.print(String(Azimuth) + "#");
-      lcdprint(13, 0, ":" + String(azcount));
+      lcdprint(14, 0, + String(azcount));
     }
     if (azcount > 999)
     {
