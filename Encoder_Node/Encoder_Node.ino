@@ -56,8 +56,10 @@ String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 long azcount;
-long   Sendcount = 0;
-
+long   Sendcount   = 0;
+long pkinterval    = 0;
+long pkstart       = 0;
+long PKcurrentTime = 0;
 
 
 void setup()
@@ -109,15 +111,20 @@ void loop()
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
 
 
-    // set the cursor to column 0, line 0
-    // (note: line 1 is the second row, since counting begins with 0):
-    lcdprint(0, 0, blankline);
-    lcdprint(0, 1, blankline);
-    lcdprint(0, 0, "rad:step " + String(Sendcount) +":" );
+    PKcurrentTime = millis();
 
-    lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
-    delay(200);
+    pkinterval = PKcurrentTime - pkstart ;
 
+    if (pkinterval > 500)
+    {
+      pkstart = millis();
+      lcdprint(0, 0, blankline);
+      lcdprint(0, 1, blankline);
+      lcdprint(0, 0, "rad:step " + String(Sendcount) + ":" );
+
+      lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
+
+    }
 
   }
 
@@ -180,7 +187,7 @@ void loop()
     {
       azcount++;
       Serial1.print(String(Azimuth) + "#");
-      lcdprint(14, 0, + String(azcount));
+      lcdprint(13, 0, String(azcount));
     }
     if (azcount > 999)
     {
