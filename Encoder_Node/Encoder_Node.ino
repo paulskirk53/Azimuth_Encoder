@@ -68,7 +68,8 @@ void setup()
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(19200);
   Serial1.begin(19200);
-
+  pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial1 link's efficiency
+  
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
