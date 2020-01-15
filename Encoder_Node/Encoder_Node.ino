@@ -1,4 +1,4 @@
-//Version 1.1 - change the variable too version number introduced Jan 2020
+//Version 2.0 - change the variable too version number introduced Jan 2020
 //  Name:       Two_Way_Encoder
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
@@ -60,7 +60,7 @@ long   Sendcount   = 0;
 long pkinterval    = 0;
 long pkstart       = 0;
 long PKcurrentTime = 0;
-
+long calltime = 0;
 
 void setup()
 {
@@ -69,7 +69,7 @@ void setup()
   Serial.begin(19200);
   Serial1.begin(19200);
   pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial1 link's efficiency
-  
+
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
@@ -105,27 +105,21 @@ void setup()
 
 void loop()
 {
+
+  encoder();
+
   while (    (!radio.available()) && !(Serial1.available() > 0)   )
   {
     encoder();
     //Serial.print ("in here");
     dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
+    LCDUpdater();
+
+    //  PKcurrentTime = millis();
+
+    //  pkinterval = PKcurrentTime - pkstart ;
 
 
-    PKcurrentTime = millis();
-
-    pkinterval = PKcurrentTime - pkstart ;
-
-    if (pkinterval > 500)
-    {
-      pkstart = millis();
-      lcdprint(0, 0, blankline);
-      lcdprint(0, 1, blankline);
-      lcdprint(0, 0, "rad:step " + String(Sendcount) + ":" );
-
-      lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
-
-    }
 
   }
 
@@ -178,7 +172,7 @@ void loop()
 
   if (Serial1.available() > 0)
   {
-
+    encoder();
     String ReceivedData = "";
 
     ReceivedData = Serial1.readStringUntil('#');
@@ -194,6 +188,9 @@ void loop()
     {
       azcount = 0;
     }
+
+    LCDUpdater();
+
   }
 
 
@@ -264,3 +261,24 @@ void lcdprint(int col, int row, String mess )
   lcd.print(mess);
 
 }
+
+void LCDUpdater()
+{
+  long timesincelastupdate;
+
+  timesincelastupdate = millis() - calltime;
+  if (timesincelastupdate > 500)
+  {
+    //Update Code here
+
+
+    lcdprint(0, 0, blankline);
+    lcdprint(0, 1, blankline);
+    lcdprint(0, 0, "rad:step " + String(Sendcount) + ":" );
+    lcdprint(13, 0, String(azcount));
+    lcdprint(0, 1, "Azimuth: " + String(Azimuth, 0) );
+
+    calltime = millis();
+  }
+
+}     //end void updater
