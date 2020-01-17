@@ -81,7 +81,7 @@ void setup()
   radio.setPALevel(RF24_PA_LOW);
   radio.enableDynamicPayloads();
   radio.openWritingPipe(masterNodeaddress);
-  radio.openReadingPipe(1, thisNodeaddress);    // "000001" the address the master writes to when communicating with this encoder node
+  radio.openReadingPipe(1, thisNodeaddress);    // "MASTR" the address the master writes to when communicating with this encoder node
   radio.startListening();
   //Serial.print ("after radio startlistening");
 
@@ -93,7 +93,7 @@ void setup()
 
   lcd.setCursor(0, 0);
   lcd.print("Az MCU Ver " + pkversion);                 //16 char display
-  delay(4000);                                   //so the message above can be seen before it is overwritten
+  delay(1000);                                   //so the message above can be seen before it is overwritten
   lcdprint(0, 0, "If comms work  a");
   lcdprint(0, 1, "counter shows.  ");
   delay(2000);                                   //so the message above can be seen before it is overwritten
@@ -153,7 +153,7 @@ void loop()
       lcdprint(0, 0, blankline);
       lcdprint(0, 0, "Responding to   ");
       lcdprint(0, 1, "Comms check...  ");
-      delay(5000);
+      delay(2000);
       lcdprint(0, 0, blankline);
       lcdprint(0, 1, blankline);
       Sendcount++;
@@ -182,7 +182,6 @@ void loop()
     {
       azcount++;
       Serial1.print(String(Azimuth) + "#");
-      lcdprint(13, 0, String(azcount));
     }
     if (azcount > 999)
     {
