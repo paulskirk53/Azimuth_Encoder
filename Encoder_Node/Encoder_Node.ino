@@ -62,8 +62,10 @@ long pkstart       = 0;
 long PKcurrentTime = 0;
 long calltime = 0;
 
+
 void setup()
 {
+  delay(5000);
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(19200);
