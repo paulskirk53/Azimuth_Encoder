@@ -41,6 +41,9 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 const byte thisNodeaddress[6] =   "encod";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
+
+const int channel = 115;
+
 char message[9] = ""  ;                              // this data type must be used for radio.write
 char commstest[17] = "Encoder online  ";
 
@@ -78,7 +81,7 @@ void setup()
 
   //Serial.print ("before radio begin");
   radio.begin();
-  radio.setChannel(100);
+  radio.setChannel(channel);
   radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
   radio.setDataRate(RF24_250KBPS);
   radio.setPALevel(RF24_PA_LOW);
