@@ -74,7 +74,7 @@ void setup()
   digitalWrite (PIN10, HIGH);            //NEW**********************
   Serial.begin(19200);
   Serial1.begin(19200);
-  
+  SPI.begin();
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
