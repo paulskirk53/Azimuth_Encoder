@@ -95,6 +95,10 @@ void setup()
 }    // end setup
 
 
+
+uint32_t configTimer =  millis();
+
+
 void loop()
 {
   encoder();
@@ -122,6 +126,11 @@ void loop()
     {
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
+
+TestforlostRadioConfiguration() ;
+
+
+
       radio.write(&message, sizeof(message));
      //test for timeout
      // test for lost config
@@ -244,6 +253,23 @@ void ConfigureRadio()
   radio.openWritingPipe(masterNodeaddress);
   radio.openReadingPipe(1, thisNodeaddress);    // "MASTR" the address the master writes to when communicating with this encoder node
   radio.startListening();
+
+}
+
+void TestforlostRadioConfiguration()   // this tests for the radio losing its configuration - one of the known failure modes for the NRF24l01+
+{
+
+  if (millis() - configTimer > 5000)
+  {
+    configTimer = millis();
+    if (radio.getChannel() != 115)   // first possible radio error - the configuration has been lost. This can be checked
+      // by testing whether a non default setting has returned to the default - for channel the default is 76
+    {
+      radio.failureDetected = true;
+      Serial.print("Radio configuration error detected");
+      ConfigureRadio();
+    }
+  }
 
 }
 
