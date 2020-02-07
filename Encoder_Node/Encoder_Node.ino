@@ -1,5 +1,4 @@
-//Version 2.0 - change the variable too version number introduced Jan 2020
-//  Name:       Two_Way_Encoder
+//  Name:       Two_Way_Encoder - with radio error checking
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
@@ -29,46 +28,42 @@
 #define  A_PHASE 2      // USES PINS 2 AND 3 in this version
 #define  B_PHASE 3
 
-
-
-
-
 RF24 radio(7, 8); // CE, CSN
 
 //liquid crystal two lines below
 const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-const byte thisNodeaddress[6] =   "encod";            // 00001 the address of this arduino board/ transmitter
+const byte thisNodeaddress[6]   = "encod";            // 00001 the address of this arduino board/ transmitter
 const byte masterNodeaddress[6] = "mastr";          // the address of the Master
 
-const int channel = 115;
+const int channel  = 115;
 
-char message[9] = ""  ;                              // this data type must be used for radio.write
+char message[9]    = ""  ;                              // this data type must be used for radio.write
 char commstest[17] = "Encoder online  ";
 
 //encoder:
 volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
 
 
-long int flag_B = 0;
+long int flag_B    = 0;
 
 //General
-String pkversion = "1.1";
-String blankline = "                ";
+String pkversion   = "2";
+String blankline   = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 long azcount;
-long   Sendcount   = 0;
-long pkinterval    = 0;
-long pkstart       = 0;
+long Sendcount     = 0;
+long PKinterval    = 0;
+long PKstart       = 0;
 long PKcurrentTime = 0;
-long calltime = 0;
+long calltime      = 0;
 
 
 void setup()
 {
-  delay(5000);
+
   pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial1 link's efficiency
   pinMode(PIN10, OUTPUT);                 // this is an NRF24L01 requirement if pin 10 is not used
   digitalWrite (PIN10, HIGH);            //NEW**********************
@@ -79,17 +74,7 @@ void setup()
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-  //Serial.print ("before radio begin");
-  radio.begin();
-  radio.setChannel(channel);
-  radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
-  radio.setDataRate(RF24_250KBPS);
-  radio.setPALevel(RF24_PA_LOW);
-  radio.enableDynamicPayloads();
-  radio.openWritingPipe(masterNodeaddress);
-  radio.openReadingPipe(1, thisNodeaddress);    // "MASTR" the address the master writes to when communicating with this encoder node
-  radio.startListening();
-  //Serial.print ("after radio startlistening");
+  ConfigureRadio();       // start the radio with the settings we need
 
   //encoder:
   pinMode(A_PHASE, INPUT);
@@ -105,34 +90,28 @@ void setup()
   delay(2000);                                   //so the message above can be seen before it is overwritten
 
   azcount = 0;
+  PKstart = 0;   //interval timer for lcd update
 
 }    // end setup
 
 
 void loop()
 {
-
   encoder();
 
-  while (    (!radio.available()) && !(Serial1.available() > 0)   )
-  {
-    encoder();
-    //Serial.print ("in here");
-    dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
-    LCDUpdater();
 
-    //  PKcurrentTime = millis();
-
-    //  pkinterval = PKcurrentTime - pkstart ;
+  dtostrf(Azimuth, 7, 2, message); // convert double to char total width 7 with 2 dp for use by radio.write
 
 
+  LCDUpdater();  // note timer is included in the routine
 
-  }
+ 
 
   if (Sendcount > 999)  //reset the radio send counts to zero
   {
     Sendcount = 0;
   }
+
   if (radio.available())
   {
     char text[32] = "";             // used to store what the master node sent e.g AZ hash SA hash
@@ -144,35 +123,13 @@ void loop()
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
       radio.write(&message, sizeof(message));
-//test for timeout
-// test for lost config
-// test for radio always available
+     //test for timeout
+     // test for lost config
+     // test for radio always available
 
-
-
-
-      
       radio.startListening();
       Sendcount++;
     }
-
-    //new code
-    if ((text[0] == 'T') && (text[1] == 'S') && (text[2] == 'T') && (text[3] == '#'))
-    {
-      //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
-      radio.stopListening();
-      radio.write(&commstest, sizeof(commstest));
-      radio.startListening();
-      lcdprint(0, 1, blankline);
-      lcdprint(0, 0, blankline);
-      lcdprint(0, 0, "Responding to   ");
-      lcdprint(0, 1, "Comms check...  ");
-      delay(2000);
-      lcdprint(0, 0, blankline);
-      lcdprint(0, 1, blankline);
-      Sendcount++;
-    }
-
 
     //end new
     // Serial.print("The text received from Master was: ");
@@ -272,6 +229,21 @@ void lcdprint(int col, int row, String mess )
   //lcd.clear();
   lcd.setCursor(col, row);
   lcd.print(mess);
+
+}
+
+void ConfigureRadio()
+{
+
+  radio.begin();
+  radio.setChannel(channel);
+  radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
+  radio.setDataRate(RF24_250KBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.enableDynamicPayloads();
+  radio.openWritingPipe(masterNodeaddress);
+  radio.openReadingPipe(1, thisNodeaddress);    // "MASTR" the address the master writes to when communicating with this encoder node
+  radio.startListening();
 
 }
 
