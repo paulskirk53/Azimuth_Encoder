@@ -18,7 +18,7 @@
 
 
 #include <SPI.h>
-#include <nRF24L01.h>
+
 #include <RF24.h>
 #include <LiquidCrystal.h>
 
@@ -144,6 +144,14 @@ void loop()
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
       radio.write(&message, sizeof(message));
+//test for timeout
+// test for lost config
+// test for radio always available
+
+
+
+
+      
       radio.startListening();
       Sendcount++;
     }
