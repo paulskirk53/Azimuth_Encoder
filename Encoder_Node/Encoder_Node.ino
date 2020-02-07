@@ -59,7 +59,7 @@ long PKinterval    = 0;
 long PKstart       = 0;
 long PKcurrentTime = 0;
 long calltime      = 0;
-
+bool Tx_sent       = false;
 
 void setup()
 {
@@ -109,7 +109,7 @@ void loop()
 
   LCDUpdater();  // note timer is included in the routine
 
- 
+
 
   if (Sendcount > 999)  //reset the radio send counts to zero
   {
@@ -120,21 +120,43 @@ void loop()
   {
     char text[32] = "";             // used to store what the master node sent e.g AZ hash SA hash
 
-    radio.read(&text, sizeof(text));
+//error detection for radio always avaiable below
+//
+
+    uint32_t failTimer = millis();
+    while (radio.available())
+    { //If available always returns true, there is a problem
+      if (millis() - failTimer > 250)
+      {
+        radio.failureDetected = true;
+        ConfigureRadio();                         // reconfigure the radio
+        //Serial.println("Radio available failure detected");
+        break;
+      }
+      radio.read(&text, sizeof(text));
+
+    }
 
     if (text[0] == 'A' && text[1] == 'Z' && text[2] == '#')
     {
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
 
-TestforlostRadioConfiguration() ;
+      TestforlostRadioConfiguration() ;
 
+//check for timeout / send failure
 
-
-      radio.write(&message, sizeof(message));
-     //test for timeout
-     // test for lost config
-     // test for radio always available
+      while (Tx_sent == false)
+      {
+        
+        Tx_sent = radio.write(&message, sizeof(message));   // true if the tx was successful
+        // test for timeout after tx
+         if (Tx_sent==false)
+         {
+          ConfigureRadio();    // if the Tx wasn't successful, restart the radio 
+         }
+         
+      }
 
       radio.startListening();
       Sendcount++;
@@ -243,7 +265,10 @@ void lcdprint(int col, int row, String mess )
 
 void ConfigureRadio()
 {
-
+  radio.powerDown();
+  delay(20);
+  radio.powerUp();
+  delay(20);
   radio.begin();
   radio.setChannel(channel);
   radio.enableAckPayload();            // enable ack payload - slaves reply with data using this feature
