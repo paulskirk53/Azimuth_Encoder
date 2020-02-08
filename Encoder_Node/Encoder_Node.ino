@@ -102,6 +102,7 @@ uint32_t configTimer =  millis();
 
 void loop()
 {
+  // Serial.println("test");
   encoder();
 
 
@@ -121,8 +122,8 @@ void loop()
   {
     char text[32] = "";             // used to store what the master node sent e.g AZ hash SA hash
 
-//error detection for radio always avaiable below
-//
+    //error detection for radio always avaiable below
+    //
 
     uint32_t failTimer = millis();
     while (radio.available())
@@ -131,7 +132,8 @@ void loop()
       {
         radio.failureDetected = true;
         ConfigureRadio();                         // reconfigure the radio
-        //Serial.println("Radio available failure detected");
+        radio.startListening();
+        Serial.println("Radio available failure detected");
         break;
       }
       radio.read(&text, sizeof(text));
@@ -140,13 +142,15 @@ void loop()
 
     if (text[0] == 'A' && text[1] == 'Z' && text[2] == '#')
     {
+      Serial.println("received AZ");
       //note the radio does not write a # mark terminator - this is added in the two way radio code before send to driver
       radio.stopListening();
 
       TestforlostRadioConfiguration() ;
+      radio.stopListening();
 
-//check for timeout / send failure
-
+      //check for timeout / send failure
+      Tx_sent = false;
       while (Tx_sent == false)
       {
 
@@ -155,12 +159,20 @@ void loop()
         if (Tx_sent == false)
         {
           ConfigureRadio();    // if the Tx wasn't successful, restart the radio
+          radio.stopListening();
+          Serial.println("tx_sent failure ");
         }
-
+        Serial.print("radio wrote ");
+        Serial.println(message);
       }
 
       radio.startListening();
       Sendcount++;
+
+      for (int i = 0; i < 32; i++)
+      {
+        text[i] = 0;
+      }
     }
 
     //end new
@@ -293,6 +305,7 @@ void TestforlostRadioConfiguration()   // this tests for the radio losing its co
       radio.failureDetected = true;
       Serial.print("Radio configuration error detected");
       ConfigureRadio();
+
     }
   }
 
@@ -300,10 +313,8 @@ void TestforlostRadioConfiguration()   // this tests for the radio losing its co
 
 void LCDUpdater()
 {
-  long timesincelastupdate;
-
-  timesincelastupdate = millis() - calltime;
-  if (timesincelastupdate > 500)
+ 
+  if ((millis() - calltime) > 500)
   {
     //Update Code here
 
