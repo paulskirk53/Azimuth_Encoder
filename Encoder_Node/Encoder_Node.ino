@@ -75,6 +75,7 @@ void setup()
   lcd.begin(16, 2);
 
   ConfigureRadio();       // start the radio with the settings we need
+  radio.startListening();
 
   //encoder:
   pinMode(A_PHASE, INPUT);
@@ -148,14 +149,14 @@ void loop()
 
       while (Tx_sent == false)
       {
-        
+
         Tx_sent = radio.write(&message, sizeof(message));   // true if the tx was successful
         // test for timeout after tx
-         if (Tx_sent==false)
-         {
-          ConfigureRadio();    // if the Tx wasn't successful, restart the radio 
-         }
-         
+        if (Tx_sent == false)
+        {
+          ConfigureRadio();    // if the Tx wasn't successful, restart the radio
+        }
+
       }
 
       radio.startListening();
@@ -277,7 +278,6 @@ void ConfigureRadio()
   radio.enableDynamicPayloads();
   radio.openWritingPipe(masterNodeaddress);
   radio.openReadingPipe(1, thisNodeaddress);    // "MASTR" the address the master writes to when communicating with this encoder node
-  radio.startListening();
 
 }
 
