@@ -5,12 +5,22 @@
 // Modified  to be modulo 360 by PK on 8-2-19
 // Modified to respond to Serial1 Tx on 8-1-2020
 
+// if it's required to set a home point or park point marker A_Counter is the variable which must be set.
+// see below for north, east, south, west values for A_Counter
+// for any position X degrees the tick position to set for A_counter is 10253 / (360/ x )
+
+
+
+
 //there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
 //so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
 //In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
 //North = 0, East = 10253/4, South = 10253/2 West = 10253*3/4
+
+
+
 
 
 // Radio is no longer in this routine, it operates via USB cable. Bye Bye Radio....
@@ -27,7 +37,10 @@ const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 //encoder:
-volatile long int A_Counter = 10253 * 0.75; // this is the position of due west
+//should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
+// the position for 261 is 7434 and is changed below to reflect this.
+
+volatile long int A_Counter = 10253 / (360/ 261); // this is the position of due west - 261 for the dome when the scope is at 270.
 
 
 long int flag_B = 0;
