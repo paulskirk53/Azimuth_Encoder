@@ -40,7 +40,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
 // the position for 261 is 7434 and is changed below to reflect this.
 
-volatile long int A_Counter = 10253 / (360/ 261); // this is the position of due west - 261 for the dome when the scope is at 270.
+volatile long int A_Counter = 10253 / (360 / 261); // this is the position of due west - 261 for the dome when the scope is at 270.
 
 
 long int flag_B = 0;
@@ -50,6 +50,7 @@ String pkversion = "2.0";
 String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
+float  SyncAz;
 long   azcount;
 long   Sendcount   = 0;
 long   pkinterval    = 0;
@@ -81,7 +82,7 @@ void setup()
   lcd.setCursor(0, 0);
   lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   delay(1000);                                   //so the message above can be seen before it is overwritten
-  
+
   azcount = 0;
 
 }    // end setup
@@ -111,6 +112,20 @@ void loop()
       azcount = 0;
     }
 
+    // Sync to Azimuth code below:
+    if (ReceivedData.indexOf("STA", 0) > -1) //
+    {
+
+      ReceivedData.remove(0, 3);  //strip 1st three chars
+      SyncAz = ReceivedData.toFloat();
+      if ((SyncAz > 0.0) && (SyncAz <= 360.0))   // check for a valid azimuth value
+      {
+        // now work out the tick position for this azimuth
+        // Number of ticks per degree is 28.481 - see comments at top of this code
+        A_Counter = SyncAz * 28.481;
+      }
+    }
+    
     LCDUpdater();
 
   }
@@ -124,7 +139,7 @@ void loop()
     ReceivedData = Serial1.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
-    if (ReceivedData.indexOf("AZ", 0) > -1) 
+    if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
       Serial1.print(String(Azimuth) + "#");
