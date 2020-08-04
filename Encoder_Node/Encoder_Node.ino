@@ -1,9 +1,9 @@
-//Version 2.0 - change the variable too version number introduced Jan 2020
+//Version 3.0 - change the variable too version number introduced Jan 2020
 //  Name:       Azimuth Encoder
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul
 // Modified  to be modulo 360 by PK on 8-2-19
-// Modified to respond to Serial1 Tx on 8-1-2020
+// Modified to respond to Serial1 Tx on 8-1-2020 - changed to Serial2 on 4-8-20
 
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
@@ -17,7 +17,10 @@
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
 //so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
 //In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
-//North = 0, East = 10253/4, South = 10253/2 West = 10253*3/4
+//North = 0 
+//East = 10253/4   = 2563
+//South = 10253/2  = 5127
+//West = 10253*3/4 = 7690
 
 
 
@@ -29,8 +32,12 @@
 
 
 //encoder:
-#define  A_PHASE 2      // USES PINS 2 AND 3 in this version
+#define  A_PHASE 2      // USES PINS 2 AND 3 for encoder interrupt
 #define  B_PHASE 3
+#define NorthPin 18
+#define EastPin  19
+#define SouthPin 20
+#define WestPin  21
 
 //liquid crystal two lines below
 const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
@@ -46,7 +53,7 @@ volatile long int A_Counter = 10253 / (360 / 261); // this is the position of du
 long int flag_B = 0;
 
 //General
-String pkversion = "2.0";
+String pkversion = "3.0";
 String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
@@ -62,11 +69,11 @@ long calltime = 0;
 void setup()
 {
 
-  pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial1 link's efficiency
+  pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
 
   Serial.begin(19200);
-  Serial1.begin(19200);
+  Serial2.begin(19200);
 
 
   // set up the LCD's number of columns and rows:
@@ -77,8 +84,14 @@ void setup()
   pinMode(A_PHASE, INPUT);
   pinMode(B_PHASE, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE), interrupt, RISING); //Interrupt trigger mode: RISING
+  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560
 
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt trigger mode: RISING
+  attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
+  attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
+  
   lcd.setCursor(0, 0);
   lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   delay(1000);                                   //so the message above can be seen before it is overwritten
@@ -125,24 +138,24 @@ void loop()
         A_Counter = SyncAz * 28.481;
       }
     }
-    
+
     LCDUpdater();
 
   }
 
 
-  if (Serial1.available() > 0)
+  if (Serial2.available() > 0)
   {
     encoder();
     String ReceivedData = "";
 
-    ReceivedData = Serial1.readStringUntil('#');
+    ReceivedData = Serial2.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
-      Serial1.print(String(Azimuth) + "#");
+      Serial2.print(String(Azimuth) + "#");
     }
     if (azcount > 999)
     {
@@ -186,8 +199,8 @@ void encoder()
 
 
 
-  // Serial1.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
-  // Serial1.println("#");               // print the string terminator
+  // Serial2.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
+  // Serial2.println("#");               // print the string terminator
   // receivedData = "";
 
 }  // end void encoder
@@ -213,6 +226,27 @@ void interrupt()               // Interrupt function
 
   }  // end else clause
 }  // end void interrupt
+
+
+void NorthSync()
+{
+ A_Counter = 0;
+}
+void EastSync()
+{
+ A_Counter = 2563;
+}
+void SouthSync()
+{
+  A_Counter =5127;
+}
+void WestSync()
+{
+  A_Counter = 7690;
+}
+
+
+
 
 void lcdprint(int col, int row, String mess )
 {
