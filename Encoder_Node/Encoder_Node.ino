@@ -17,7 +17,7 @@
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
 //so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
 //In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
-//North = 0 
+//North = 0
 //East = 10253/4   = 2563
 //South = 10253/2  = 5127
 //West = 10253*3/4 = 7690
@@ -47,7 +47,7 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
 // the position for 261 is 7434 and is changed below to reflect this.
 
-volatile long int A_Counter = 10253 / (360 / 261); // this is the position of due west - 261 for the dome when the scope is at 270.
+volatile long int A_Counter ;
 
 
 long int flag_B = 0;
@@ -69,8 +69,12 @@ long calltime = 0;
 void setup()
 {
 
-  pinMode(19, INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+  pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches for syncing the encoder
+  pinMode(EastPin,    INPUT_PULLUP);
+  pinMode(SouthPin,   INPUT_PULLUP);
+  pinMode(WestPin,    INPUT_PULLUP);
 
+  pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
   Serial.begin(19200);
   Serial2.begin(19200);
@@ -91,12 +95,15 @@ void setup()
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
   attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
-  
+
   lcd.setCursor(0, 0);
   lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   delay(1000);                                   //so the message above can be seen before it is overwritten
 
   azcount = 0;
+
+  A_Counter = 7433  ;      // THIS IS 10253 / (360 / 261) - the position of due west - 261 for the dome when the scope is at 270.
+
 
 }    // end setup
 
@@ -139,10 +146,10 @@ void loop()
       }
     }
 
-    LCDUpdater();
+    //WAS HERE    LCDUpdater();
 
   }
-
+  LCDUpdater();//now here
 
   if (Serial2.available() > 0)
   {
@@ -230,15 +237,15 @@ void interrupt()               // Interrupt function
 
 void NorthSync()
 {
- A_Counter = 0;
+  A_Counter = 0;
 }
 void EastSync()
 {
- A_Counter = 2563;
+  A_Counter = 2563;
 }
 void SouthSync()
 {
-  A_Counter =5127;
+  A_Counter = 5127;
 }
 void WestSync()
 {
