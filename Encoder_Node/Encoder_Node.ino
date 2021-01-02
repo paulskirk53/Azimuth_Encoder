@@ -10,8 +10,6 @@
 // for any position X degrees the tick position to set for A_counter is 10253 / (360/ x )
 
 
-
-
 //there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
@@ -32,12 +30,12 @@
 
 
 //encoder:
-#define  A_PHASE 2      // USES PINS 2 AND 3 for encoder interrupt
-#define  B_PHASE 3
-#define NorthPin 18
-#define EastPin  19
-#define SouthPin 20
-#define WestPin  21
+#define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
+#define  B_PHASE  3
+#define  NorthPin 18
+#define  EastPin  19
+#define  SouthPin 20
+#define  WestPin  21
 
 //liquid crystal two lines below
 const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
@@ -78,6 +76,7 @@ void setup()
 
   Serial.begin(19200);
   Serial2.begin(19200);
+  Serial3.begin(19200);
 
 
   // set up the LCD's number of columns and rows:
@@ -90,7 +89,7 @@ void setup()
 
   // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt trigger mode: RISING
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt trigger mode: RISING - really?
   attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
   attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
@@ -123,14 +122,11 @@ void loop()
     // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1) //
     {
-      azcount++;
+
       Serial.print(String(Azimuth) + "#");
     }
 
-    if (azcount > 999)
-    {
-      azcount = 0;
-    }
+
 
     // Sync to Azimuth code below:
     if (ReceivedData.indexOf("STA", 0) > -1) //
@@ -143,15 +139,15 @@ void loop()
         // now work out the tick position for this azimuth
         // Number of ticks per degree is 28.481 - see comments at top of this code
         A_Counter = SyncAz * 28.481;
-      }
-    }
+      } // endif
+    }  // endif
 
     //WAS HERE    LCDUpdater();
 
   }
-  LCDUpdater();//now here
+  // LCDUpdater();//now here
 
-  if (Serial2.available() > 0)
+  if (Serial2.available() > 0)   // ser2 is encoder with stepper
   {
     encoder();
     String ReceivedData = "";
@@ -163,16 +159,28 @@ void loop()
     {
       azcount++;
       Serial2.print(String(Azimuth) + "#");
-    }
+    } // endif
+
     if (azcount > 999)
     {
       azcount = 0;
-    }
+    } // endif
 
     LCDUpdater();
 
-  }
+  } // endif
 
+  if (Serial3.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
+  {
+    String Ser3Data = Serial3.readStringUntil('#');
+    if (Ser3Data.indexOf("EncoderRequest", 0) > -1)
+    {
+      Serial3.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
+      Serial3.print(String(azcount) + "#");
+
+    } // Endif
+
+  } // endif
 
 }  // end void loop
 
@@ -265,6 +273,11 @@ void lcdprint(int col, int row, String mess )
 
 void LCDUpdater()
 {
+
+  // in new version azcount is the var to send to the monitor code
+  // the LCDUpdater will be renamed and doesn't need the timesincelastupdate funstion as updates will be requested via
+  // a serial connection
+
   long timesincelastupdate;
 
   timesincelastupdate = millis() - calltime;
