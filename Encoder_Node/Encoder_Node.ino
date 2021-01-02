@@ -39,7 +39,7 @@
 
 //liquid crystal two lines below
 const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+// LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 //encoder:
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
@@ -80,7 +80,7 @@ void setup()
 
 
   // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
+  // lcd.begin(16, 2);
 
 
   //encoder:
@@ -95,9 +95,9 @@ void setup()
   attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
 
-  lcd.setCursor(0, 0);
-  lcd.print("Az MCU Ver " + pkversion);                 //16 char display
-  delay(1000);                                   //so the message above can be seen before it is overwritten
+  //lcd.setCursor(0, 0);
+  //lcd.print("Az MCU Ver " + pkversion);                 //16 char display
+  //delay(1000);                                   //so the message above can be seen before it is overwritten
 
   azcount = 0;
 
@@ -166,7 +166,7 @@ void loop()
       azcount = 0;
     } // endif
 
-    LCDUpdater();
+    //  LCDUpdater();
 
   } // endif
 
@@ -262,17 +262,17 @@ void WestSync()
 
 
 
-
-void lcdprint(int col, int row, String mess )
-{
+/*
+  void lcdprint(int col, int row, String mess )
+  {
   //lcd.clear();
   lcd.setCursor(col, row);
   lcd.print(mess);
 
-}
+  }
 
-void LCDUpdater()
-{
+  void LCDUpdater()
+  {
 
   // in new version azcount is the var to send to the monitor code
   // the LCDUpdater will be renamed and doesn't need the timesincelastupdate funstion as updates will be requested via
@@ -295,4 +295,5 @@ void LCDUpdater()
     calltime = millis();
   }
 
-}     //end void updater
+  }     //end void updater
+*/
