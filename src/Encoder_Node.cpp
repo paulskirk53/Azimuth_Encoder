@@ -1,4 +1,4 @@
-//Version 3.0 - change the variable too version number introduced Jan 2020
+//Version 3.0 - change the variable too. Version number introduced Jan 2020
 //  Name:       Azimuth Encoder
 //   Created:  28/11/2018 08:46:37
 //   Author:     DESKTOP-OCFJAV9\Paul

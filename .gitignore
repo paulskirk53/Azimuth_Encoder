@@ -1,8 +1,6 @@
-# directories #
-/Debug/
-/Release/
-/.vs/
-/_vm/
+# directories related to platformio and vsscode#
+/.vscode/
+/.pio/
 
 
 # Compiled source #
@@ -14,9 +12,6 @@
 *.o
 *.so
 *.hex
-*.elf
-*.xml
-*.buildinfo
 
 # Packages #
 ############
