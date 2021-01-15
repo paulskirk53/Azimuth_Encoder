@@ -21,12 +21,23 @@
 //West = 10253*3/4 = 7690
 
 
-
-
-
 // Radio is no longer in this routine, it operates via USB cable. Bye Bye Radio....
-
+#include <arduino.h>
 #include <LiquidCrystal.h>
+#include <wire.h>
+
+//function declarations
+
+void encoder();
+void interrupt();
+void NorthSync();
+void EastSync();
+void SouthSync();
+void WestSync();
+
+
+
+//end function declarations
 
 
 //encoder:
