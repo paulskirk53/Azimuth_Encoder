@@ -47,10 +47,10 @@ void WestSync();
 //encoder:
 #define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
 #define  B_PHASE  3
-#define  NorthPin 8     
-#define  EastPin  9
-#define  SouthPin 10
-#define  WestPin  11
+// #define  NorthPin 8     //decided not to use
+#define  EastPin  8
+// #define  SouthPin 10    //decided not to use
+#define  WestPin  9
 
 // software serial
 #define TwistedRx 4
@@ -88,7 +88,8 @@ void setup()
 {
 
 // if necessary on the bare chip do this PCICR |= 0b00000111;     turn on all ports for pin change interrupt capability https://thewanderingengineer.com/2014/08/11/arduino-pin-change-interrupts/
-
+// it looks like it will be necessary, because only two interrupt pins are set - 2 and 3
+// also needs the mask step too - see the url above
 
   pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches or hall sesnsors for syncing the encoder todo changes the pins
   pinMode(EastPin,    INPUT_PULLUP);
@@ -108,10 +109,10 @@ void setup()
 
   // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 todo check for the mega 328P
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt todo we need all these? Probably need just one perhaps ?
-  attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt todo do we need all these? Probably need west and east perhaps ?
+ // attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
-  attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
+ // attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
 
 
