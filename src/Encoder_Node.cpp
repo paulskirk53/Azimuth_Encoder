@@ -1,10 +1,15 @@
-//Version 3.0 - change the variable too. Version number introduced Jan 2020
-//  Name:       Azimuth Encoder
+//  Version 4.0 - change the variable too. Version number introduced Jan 2020
+//   Name:       Azimuth Encoder
 //   Created:  28/11/2018 08:46:37
-//   Author:     DESKTOP-OCFJAV9\Paul
-// Modified  to be modulo 360 by PK on 8-2-19
-// Modified to respond to Serial1 Tx on 8-1-2020 - changed to Serial2 on 4-8-20
-
+//   Author:   Paul Kirk
+//
+// see for chip pinout https://www.componentsinfo.com/atmega328p-pinout-configuration-datasheet/
+//
+// This version is without the LCD panel and includes functionality for the new serial interface with the MCU Monitoring application
+// The board context is changed for power saving to an ATMEGA328P which has only one Hardware serial port, so the other two serial
+// Ports are provided by software Serial
+//
+// Homing Information:
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
 // for any position X degrees the tick position to set for A_counter is 10253 / (360/ x )
@@ -23,8 +28,7 @@
 
 // Radio is no longer in this routine, it operates via USB cable. Bye Bye Radio....
 #include <arduino.h>
-#include <LiquidCrystal.h>
-#include <wire.h>
+#include <SoftwareSerial.h>
 
 //function declarations
 
@@ -43,72 +47,76 @@ void WestSync();
 //encoder:
 #define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
 #define  B_PHASE  3
-#define  NorthPin 18
-#define  EastPin  19
-#define  SouthPin 20
-#define  WestPin  21
+#define  NorthPin 8     
+#define  EastPin  9
+#define  SouthPin 10
+#define  WestPin  11
 
-//liquid crystal two lines below
-const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
-// LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+// software serial
+#define TwistedRx 4
+#define TwistedTx 5
+#define MCUMonRx  6
+#define MCUMonTx  7
 
 //encoder:
-//should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
-// the position for 261 is 7434 and is changed below to reflect this.
+//The encoder is initialised at 261 degrees which is the observing session start position. This is required because the scope is 'dry' initialised at Az = 270
+// which corresponds with dome Az = 261. 
+// the position for 261 is 7434 and is changed below to reflect this. ( A_Counter = 7434 in setup ).
 
 volatile long int A_Counter ;
-
 
 long int flag_B = 0;
 
 //General
-String pkversion = "3.0";
-String blankline = "                ";
-String lcdazimuth;
-double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
-float  SyncAz;
-long   azcount;
-long   Sendcount   = 0;
+String pkversion    = "4.0";               //the first version which comms with the  MCU monitor app rather than LCD panel
+
+double Azimuth;                            // to be returned when a TX call is processed by this arduino board
+float  SyncAz;                            // used to facilitate the sync to azimuth command
+long   azcount;                           // a counter sent to the MCU monitoring app to indicate comms between encoder and stepper is working
+long   Sendcount     = 0;
 long   pkinterval    = 0;
 long   pkstart       = 0;
 
-long calltime = 0;
+long calltime        = 0;
+
+SoftwareSerial SerialWithStepper(4,5) ;  //todo set the pins up as const rather than these fixtures
+SoftwareSerial SerialMCUMonitor(6,7);    //todo set the pins up as const rather than these fixtures
+
 
 
 void setup()
 {
 
-  pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches for syncing the encoder
+// if necessary on the bare chip do this PCICR |= 0b00000111;     turn on all ports for pin change interrupt capability https://thewanderingengineer.com/2014/08/11/arduino-pin-change-interrupts/
+
+
+  pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches or hall sesnsors for syncing the encoder todo changes the pins
   pinMode(EastPin,    INPUT_PULLUP);
   pinMode(SouthPin,   INPUT_PULLUP);
   pinMode(WestPin,    INPUT_PULLUP);
 
-  pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
-
-  Serial.begin(19200);
-  Serial2.begin(19200);
-  Serial3.begin(19200);
-
-
-  // set up the LCD's number of columns and rows:
-  // lcd.begin(16, 2);
+  pinMode(17,         INPUT_PULLUP);            // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+                                                // note this is the twisted pair serial between encoder and stepper
+  Serial.begin(19200);               
+  SerialWithStepper.begin(19200);               // changed to software serial  todo check the software serial baud rate still works
+  SerialMCUMonitor.begin(19200);                // todo change to software serial - this one is the serial with monitor additional FTDI
 
 
   //encoder:
   pinMode(A_PHASE, INPUT);
   pinMode(B_PHASE, INPUT);
 
-  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560
+  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 todo check for the mega 328P
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt trigger mode: RISING - really?
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt todo we need all these? Probably need just one perhaps ?
   attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
   attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
 
-  //lcd.setCursor(0, 0);
-  //lcd.print("Az MCU Ver " + pkversion);                 //16 char display
-  //delay(1000);                                   //so the message above can be seen before it is overwritten
+
+  //  todo set this up as a blank global var, then populate with the following in Setup and write it to the monitor app lcd.print("Az MCU Ver " + pkversion);                
+  
 
   azcount = 0;
 
@@ -123,7 +131,7 @@ void loop()
 
   encoder();
 
-  if (Serial.available() > 0)
+  if (Serial.available() > 0)                      // this is the only h/w serial available on the 328P and is serial with the ASCOM driver
   {
     encoder();
     String ReceivedData = "";
@@ -148,28 +156,28 @@ void loop()
       if ((SyncAz > 0.0) && (SyncAz <= 360.0))   // check for a valid azimuth value
       {
         // now work out the tick position for this azimuth
-        // Number of ticks per degree is 28.481 - see comments at top of this code
+        // Number of ticks per degree is 28.481 - see comments at top of this code  todo change this in the new observatory
         A_Counter = SyncAz * 28.481;
       } // endif
     }  // endif
 
-    //WAS HERE    LCDUpdater();
+    
 
   }
-  // LCDUpdater();//now here
+  
 
-  if (Serial2.available() > 0)   // ser2 is encoder with stepper
+  if (SerialWithStepper.available() > 0)   // ser2 is encoder with stepper
   {
     encoder();
     String ReceivedData = "";
 
-    ReceivedData = Serial2.readStringUntil('#');
+    ReceivedData = SerialWithStepper.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
-      Serial2.print(String(Azimuth) + "#");
+      SerialWithStepper.print(String(Azimuth) + "#");
     } // endif
 
     if (azcount > 999)
@@ -181,13 +189,13 @@ void loop()
 
   } // endif
 
-  if (Serial3.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
+  if (SerialMCUMonitor.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
   {
-    String Ser3Data = Serial3.readStringUntil('#');
+    String Ser3Data = SerialMCUMonitor.readStringUntil('#');
     if (Ser3Data.indexOf("EncoderRequest", 0) > -1)
     {
-      Serial3.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
-      Serial3.print(String(azcount) + "#");
+      SerialMCUMonitor.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
+      SerialMCUMonitor.print(String(azcount) + "#");
 
     } // Endif
 
@@ -225,8 +233,8 @@ void encoder()
 
 
 
-  // Serial2.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
-  // Serial2.println("#");               // print the string terminator
+  // SerialWithStepper.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
+  // SerialWithStepper.println("#");               // print the string terminator
   // receivedData = "";
 
 }  // end void encoder
