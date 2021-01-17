@@ -45,7 +45,7 @@ void WestSync();
 
 
 //encoder:
-#define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
+#define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt - these are the standard interrupt pins on the 328
 #define  B_PHASE  3
 // #define  NorthPin 8     //decided not to use
 #define  EastPin  8        //pcint0 - see setup()
@@ -53,8 +53,8 @@ void WestSync();
 #define  WestPin  9        //pcint1 - see Setup()
 
 // software serial
-#define TwistedRx 4
-#define TwistedTx 5
+#define StepperRx 4
+#define StepperTx 5
 #define MCUMonRx  6
 #define MCUMonTx  7
 
@@ -79,8 +79,8 @@ long   pkstart       = 0;
 
 long calltime        = 0;
 
-SoftwareSerial SerialWithStepper(4,5) ;  //todo set the pins up as const rather than these fixtures
-SoftwareSerial SerialMCUMonitor(6,7);    //todo set the pins up as const rather than these fixtures
+SoftwareSerial SerialWithStepper(StepperRx,StepperTx) ;  //todo set the pins up as const rather than these fixtures
+SoftwareSerial SerialMCUMonitor(MCUMonRx,MCUMonTx);    //todo set the pins up as const rather than these fixtures
 
 
 
