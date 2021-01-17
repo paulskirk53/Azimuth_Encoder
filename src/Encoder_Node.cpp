@@ -48,9 +48,9 @@ void WestSync();
 #define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
 #define  B_PHASE  3
 // #define  NorthPin 8     //decided not to use
-#define  EastPin  8
+#define  EastPin  8        //pcint0 - see setup()
 // #define  SouthPin 10    //decided not to use
-#define  WestPin  9
+#define  WestPin  9        //pcint1 - see Setup()
 
 // software serial
 #define TwistedRx 4
@@ -90,6 +90,11 @@ void setup()
 // if necessary on the bare chip do this PCICR |= 0b00000111;     turn on all ports for pin change interrupt capability https://thewanderingengineer.com/2014/08/11/arduino-pin-change-interrupts/
 // it looks like it will be necessary, because only two interrupt pins are set - 2 and 3
 // also needs the mask step too - see the url above
+cli();
+PCICR  |= 0b00000111;                             // turn on all ports for pin change interrupt capability
+PCMSK0 |= 0b00000011;                             // this mask switches on the bits to be used for interrupts - pins 8 and 9
+sei();
+
 
   pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches or hall sesnsors for syncing the encoder todo changes the pins
   pinMode(EastPin,    INPUT_PULLUP);
@@ -164,7 +169,8 @@ void loop()
 
     
 
-  }
+  } / endif serial available
+  
   
 
   if (SerialWithStepper.available() > 0)   // ser2 is encoder with stepper
