@@ -39,8 +39,6 @@ void EastSync();
 void SouthSync();
 void WestSync();
 
-
-
 //end function declarations
 
 
@@ -95,12 +93,11 @@ PCMSK0 |= 0b00000011;                             // this mask switches on the b
 sei();
 
 
-  pinMode(NorthPin,   INPUT_PULLUP);             // these are 4 microswitches or hall sesnsors for syncing the encoder todo changes the pins
+   // these are 2 microswitches or hall sesnsors for syncing the encoder todo changes the pins
   pinMode(EastPin,    INPUT_PULLUP);
-  pinMode(SouthPin,   INPUT_PULLUP);
   pinMode(WestPin,    INPUT_PULLUP);
 
-  pinMode(17,         INPUT_PULLUP);            // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+  pinMode(StepperRx,  INPUT_PULLUP);            // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the serial link's efficiency
                                                 // note this is the twisted pair serial between encoder and stepper
   Serial.begin(19200);               
   SerialWithStepper.begin(19200);               // changed to software serial  todo check the software serial baud rate still works
@@ -111,12 +108,13 @@ sei();
   pinMode(A_PHASE, INPUT);
   pinMode(B_PHASE, INPUT);
 
-  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 todo check for the mega 328P
+  
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt todo do we need all these? Probably need west and east perhaps ?
- // attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); 
+  
+  //Interrupts for azimuth synchronisation - in case of errors in the rotary encoder.
+ 
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
- // attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( WestPin),  WestSync,  RISING);
 
 
