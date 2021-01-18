@@ -47,9 +47,8 @@ void WestSync();
 //encoder:
 #define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt - these are the standard interrupt pins on the 328
 #define  B_PHASE  3
-// #define  NorthPin 8     //decided not to use
+
 #define  EastPin  8        //pcint0 - see setup()
-// #define  SouthPin 10    //decided not to use
 #define  WestPin  9        //pcint1 - see Setup()
 
 // software serial
@@ -269,18 +268,12 @@ void interrupt()               // Interrupt function
 }  // end void interrupt
 
 
-void NorthSync()
-{
-  A_Counter = 0;
-}
+
 void EastSync()
 {
   A_Counter = 2563;
 }
-void SouthSync()
-{
-  A_Counter = 5127;
-}
+
 void WestSync()
 {
   A_Counter = 7690;
