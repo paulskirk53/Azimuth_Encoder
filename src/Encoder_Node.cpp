@@ -87,9 +87,9 @@ void setup()
 
   pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
-  Serial.begin(19200);
-  Serial2.begin(19200);
-  Serial3.begin(19200);
+  Serial.begin(19200);    // with ASCOM driver
+  Serial2.begin(19200);   // with stepper MCU
+  Serial3.begin(19200);   // with monitor program
 
 
   // set up the LCD's number of columns and rows:
@@ -102,7 +102,9 @@ void setup()
 
   // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560
 
-  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING); //Interrupt trigger mode: RISING - really?
+  attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING);   // interrupt for the encoder device
+  
+  //interupts for the azimuth syncs below
   attachInterrupt(digitalPinToInterrupt( NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt( EastPin),  EastSync,  RISING);
   attachInterrupt(digitalPinToInterrupt( SouthPin), SouthSync, RISING);
@@ -125,7 +127,7 @@ void loop()
 
   encoder();
 
-  if (Serial.available() > 0)
+  if (Serial.available() > 0)     // request from ASCOM Driver
   {
     encoder();
     String ReceivedData = "";
@@ -160,7 +162,7 @@ void loop()
   }
   // LCDUpdater();//now here
 
-  if (Serial2.available() > 0)   // ser2 is encoder with stepper
+  if (Serial2.available() > 0)   // ser2 is encoder with stepper MCU
   {
     encoder();
     String ReceivedData = "";
