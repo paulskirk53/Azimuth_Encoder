@@ -9,18 +9,21 @@
 
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
-// for any position X degrees the tick position to set for A_counter is 10253 / (360/ x )
+// for any position X degrees the tick position to set for A_counter is 10030 / (360/ x )
 
 
-//there are 25.6 rotations of the encoder wheel for one complete rotation of the dome.
+//there are 25.6 rotations of the encoder wheel for one complete rotation of the garden dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
-//so in the new system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
-//In terms of ticks therefore, the total number of ticks for a dome revolution is 25.6 * 400.5 = 10253
+//so in the garden system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
+//In terms of ticks therefore, the total number of ticks for a garden dome revolution is 25.6 * 400.5 = 10253
+// in the pulsar dome 10253 ticks equated to 368 degrees when the dome did one complete rev, so I used that to work out
+// that 1 degree is 28 ticks and therefore 360 degrees is 10030 ticks - this is the number to use in the pulsar dome
+
 //North = 0
-//East = 10253/4   = 2563
-//South = 10253/2  = 5127
-//West = 10253*3/4 = 7690
+//East = 10030/4    
+//South = 10030/2   
+//West = 10030*3/4 
 
 
 // Radio is no longer in this routine, it operates via USB cable. Bye Bye Radio....
@@ -56,7 +59,7 @@ const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
 
 //encoder:
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
-// the position for 261 is 7434 and is changed below to reflect this.
+// the position for 261 is xxx and is changed below to reflect this.
 
 volatile long int A_Counter ;
 
@@ -70,10 +73,10 @@ String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 float  SyncAz;
 long   azcount;
-long   Sendcount   = 0;
-long   pkinterval    = 0;
-long   pkstart       = 0;
-
+long   Sendcount      = 0;
+long   pkinterval     = 0;
+long   pkstart        = 0;
+float ticksperDomeRev = 10030.0;
 long calltime = 0;
 
 
@@ -116,7 +119,7 @@ void setup()
 
   azcount = 0;
 
-  A_Counter = 7433  ;      // THIS IS 10253 / (360 / 261) - the position of due west - 261 for the dome when the scope is at 270.
+  A_Counter = ticksperDomeRev /(360 / 261)  ;      //  the position of due west - 261 for the dome when the scope is at 270.
 
 
 }    // end setup
@@ -205,15 +208,15 @@ void encoder()
 
   if (A_Counter < 0)
   {
-    A_Counter =  A_Counter + 10253;     // set the counter floor value
+    A_Counter =  A_Counter + ticksperDomeRev;     // set the counter floor value
   }
 
-  if (A_Counter > 10253)   // set the counter ceiling value
+  if (A_Counter > ticksperDomeRev)   // set the counter ceiling value
   {
-    A_Counter = A_Counter -  10253;
+    A_Counter = A_Counter -  ticksperDomeRev;
   }
 
-  Azimuth = float(A_Counter) / 28.481;    // 28.481 is 10253 (counts for 25.6 revs) / 360 (degrees)
+  Azimuth = float(A_Counter) / 27.861;    // 27.861 is 10030 (counts for one dome rev) / 360 (degrees)
   // i.e number of ticks per degree
 
   // some error checking
@@ -264,15 +267,15 @@ void NorthSync()
 }
 void EastSync()
 {
-  A_Counter = 2563;
+  A_Counter = ticksperDomeRev/4.0;
 }
 void SouthSync()
 {
-  A_Counter = 5127;
+  A_Counter = ticksperDomeRev/2.0;
 }
 void WestSync()
 {
-  A_Counter = 7690;
+  A_Counter = ticksperDomeRev * 0.75;
 }
 
 
