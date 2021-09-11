@@ -1,4 +1,4 @@
-//Version 4.0 - change the variable too. Version number introduced Jan 2020 This code has been modified to remove the LCD
+// Version 4.0 - change the variable too. Version number introduced Jan 2020 This code has been modified to remove the LCD
 // and incorporates the Monitor program. Ready for testing.
 
 //  Name:       Azimuth Encoder
@@ -9,28 +9,24 @@
 
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
-// for any position X degrees the tick position to set for A_counter is 10030 / (360/ x )
+// for any position X degrees the tick position to set for A_counter is ticksperDomeRev / (360/ x )
 
 
-//there are 25.6 rotations of the encoder wheel for one complete rotation of the garden dome.
+// there are 26.25 rotations of the encoder wheel for one complete rotation of the pulsar dome.
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
-//so in the garden system with the toothed wheel around the perimeter, it takes 25.6 revs of the encoder wheel for 1 dome rotation
-//In terms of ticks therefore, the total number of ticks for a garden dome revolution is 25.6 * 400.5 = 10253
-// in the pulsar dome 10253 ticks equated to 368 degrees when the dome did one complete rev, so I used that to work out
-// that 1 degree is 28 ticks and therefore 360 degrees is 10030 ticks - this is the number to use in the pulsar dome
+// so in the pulsar system with the toothed wheel around the perimeter, it takes 26.25 revs of the encoder wheel for 1 dome rotation
+// In terms of ticks therefore, the total number of ticks for a garden dome revolution is 26.25 * 400.5 = 10513
+
 
 //North = 0
-//East = 10030/4    
-//South = 10030/2   
-//West = 10030*3/4 
+//East = ticksperDomeRev/4    
+//South = ticksperDomeRev/2   
+//West = ticksperDomeRev*3/4 
 
 
-// Radio is no longer in this routine, it operates via USB cable. Bye Bye Radio....
 #include <arduino.h>
-#include <LiquidCrystal.h>
-//sort this   did not compile #include <wire.h>
-//number of turns of encoder wheel for one dome rotation is 26.25
+
 
 //function declarations
 
@@ -54,15 +50,11 @@ void WestSync();
 #define  SouthPin 20
 #define  WestPin  21
 
-//liquid crystal two lines below
-const int rs = 27, en = 26, d4 = 25, d5 = 24, d6 = 23, d7 = 22;
-// LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
 //encoder:
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
-// the position for 261 is xxx and is changed below to reflect this.
+// the position for 261 is set in Setup() below to reflect this.
 
-volatile long int A_Counter ;
+volatile long int A_Counter ;   // volatile because it's used in the interrupt routne
 
 
 long int flag_B = 0;
@@ -74,11 +66,11 @@ String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
 float  SyncAz;
 long   azcount;
-long   Sendcount      = 0;
-long   pkinterval     = 0;
-long   pkstart        = 0;
-float ticksperDomeRev = 10030.0;
-long calltime = 0;
+long   Sendcount       = 0;
+long   pkinterval      = 0;
+long   pkstart         = 0;
+float  ticksperDomeRev = 10513.0;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+long   calltime        = 0;
 
 
 void setup()
@@ -161,7 +153,7 @@ void loop()
       } // endif
     }  // endif
 
-    //WAS HERE    LCDUpdater();
+    
 
   }
   // LCDUpdater();//now here
@@ -217,7 +209,7 @@ void encoder()
     A_Counter = A_Counter -  ticksperDomeRev;
   }
 
-  Azimuth = float(A_Counter) / 27.861;    // 27.861 is 10030 (counts for one dome rev) / 360 (degrees)
+  Azimuth = float(A_Counter) / (ticksperDomeRev / 360.0);    // (ticks for one dome rev) / 360 (degrees) - about 29
   // i.e number of ticks per degree
 
   // some error checking
