@@ -1,5 +1,7 @@
-// Version 4.0 - change the variable too. Version number introduced Jan 2020 This code has been modified to remove the LCD
-// and incorporates the Monitor program. Ready for testing.
+//This code has been modified to remove the LCD
+// and incorporates the Monitor program. 
+
+//NB the changes need testing as of this note 4-10-21 - remove this once tested
 
 //  Name:       Azimuth Encoder
 //   Created:  28/11/2018 08:46:37
@@ -60,7 +62,7 @@ volatile long int A_Counter ;   // volatile because it's used in the interrupt r
 long int flag_B = 0;
 
 //General
-String pkversion = "3.0";
+String pkversion = "4.0";
 String blankline = "                ";
 String lcdazimuth;
 double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
