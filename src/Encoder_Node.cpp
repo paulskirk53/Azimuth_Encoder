@@ -85,9 +85,10 @@ void setup()
 
   pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
-  Serial.begin(19200);    // with ASCOM driver
-  Serial2.begin(19200);   // with stepper MCU
-  Serial3.begin(19200);   // with monitor program
+// notes for serial comms - 
+  Serial.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
+  Serial2.begin(19200);   // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
+  Serial3.begin(19200);   // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
 
 
   // set up the LCD's number of columns and rows:
@@ -98,7 +99,7 @@ void setup()
   pinMode(A_PHASE, INPUT);
   pinMode(B_PHASE, INPUT);
 
-  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560
+  // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 (no pin limit)restrictions on 4809)
 
   attachInterrupt(digitalPinToInterrupt( A_PHASE),  interrupt, RISING);   // interrupt for the encoder device
   
