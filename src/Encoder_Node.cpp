@@ -1,3 +1,41 @@
+
+
+/*
+
+Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
+
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+This is the Merged-Box-Azimuth_Encoder branch
+
+Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //This code has been modified to remove the LCD
 // and incorporates the Monitor program. 
 
