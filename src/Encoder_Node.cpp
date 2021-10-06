@@ -1,5 +1,5 @@
 
-
+// note the todo items in this file and make the changes indicated
 /*
 
 Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
@@ -23,29 +23,14 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 //This code has been modified to remove the LCD
 // and incorporates the Monitor program. 
 
 //NB the changes need testing as of this note 4-10-21 - remove this once tested
 
-//  Name:       Azimuth Encoder
-//   Created:  28/11/2018 08:46:37
+//  Name:       Merged-Box-Azimuth_Encoder
+//   Created:  5-10-21
 //   Author:     DESKTOP-OCFJAV9\Paul
-// Modified  to be modulo 360 by PK on 8-2-19
-// Modified to respond to Serial1 Tx on 8-1-2020 - changed to Serial2 on 4-8-20
 
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
@@ -56,7 +41,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // in a previous version without the toothed wheel around the perimeter, 26 encoder wheel revolutions  equalled 10413 encoder ticks
 // from which it can bee calculated that 1 encoder wheel rev equates to 400.5 ticks.
 // so in the pulsar system with the toothed wheel around the perimeter, it takes 26.25 revs of the encoder wheel for 1 dome rotation
-// In terms of ticks therefore, the total number of ticks for a garden dome revolution is 26.25 * 400.5 = 10513
+// In terms of ticks therefore, the total number of ticks for a Pulsar dome revolution is 26.25 * 400.5 = 10513
 
 
 //North = 0
@@ -94,7 +79,7 @@ void WestSync();
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
 // the position for 261 is set in Setup() below to reflect this.
 
-volatile long int A_Counter ;   // volatile because it's used in the interrupt routne
+volatile long int A_Counter ;   // volatile because it's used in the interrupt routine
 
 
 long int flag_B = 0;
@@ -121,12 +106,13 @@ void setup()
   pinMode(SouthPin,   INPUT_PULLUP);
   pinMode(WestPin,    INPUT_PULLUP);
 
+//todo - the line below will need change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
   pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
 // notes for serial comms - 
   Serial.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
-  Serial2.begin(19200);   // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
-  Serial3.begin(19200);   // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
+  Serial1.begin(19200);   // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
+  Serial2.begin(19200);   // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
 
 
   // set up the LCD's number of columns and rows:
@@ -204,13 +190,13 @@ void loop()
     encoder();
     String ReceivedData = "";
 
-    ReceivedData = Serial2.readStringUntil('#');
+    ReceivedData = Serial1.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
-      Serial2.print(String(Azimuth) + "#");
+      Serial1.print(String(Azimuth) + "#");
     } // endif
 
     if (azcount > 999)
@@ -222,13 +208,13 @@ void loop()
 
   } // endif
 
-  if (Serial3.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
+  if (Serial2.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
   {
-    String Ser3Data = Serial3.readStringUntil('#');
+    String Ser3Data = Serial2.readStringUntil('#');
     if (Ser3Data.indexOf("EncoderRequest", 0) > -1)
     {
-      Serial3.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
-      Serial3.print(String(azcount) + "#");
+      Serial2.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
+      Serial2.print(String(azcount) + "#");
 
     } // Endif
 
@@ -266,8 +252,8 @@ void encoder()
 
 
 
-  // Serial2.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
-  // Serial2.println("#");               // print the string terminator
+  // Serial1.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
+  // Serial1.println("#");               // print the string terminator
   // receivedData = "";
 
 }  // end void encoder
