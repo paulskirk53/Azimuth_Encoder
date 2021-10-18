@@ -50,7 +50,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 //West = ticksperDomeRev*3/4 
 
 
-#include <arduino.h>
+#include <Arduino.h>
 
 
 //function declarations
@@ -106,8 +106,8 @@ void setup()
   pinMode(SouthPin,   INPUT_PULLUP);
   pinMode(WestPin,    INPUT_PULLUP);
 
-//todo - the line below will need change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
-  pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+//todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
+ // pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 
 // notes for serial comms - 
   Serial.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
@@ -147,7 +147,7 @@ void setup()
 
 void loop()
 {
-
+ // Serial.println("HERE");
   encoder();
 
   if (Serial.available() > 0)     // request from ASCOM Driver
@@ -183,16 +183,16 @@ void loop()
     
 
   }
-  // LCDUpdater();//now here
+  
 
-  if (Serial2.available() > 0)   // ser2 is encoder with stepper MCU
+  if (Serial1.available() > 0)   // ser1 is encoder with stepper MCU
   {
     encoder();
     String ReceivedData = "";
 
     ReceivedData = Serial1.readStringUntil('#');
-    // Serial.print("received ");
-    // Serial.println(ReceivedData );
+    // Serial1.print("received ");
+    // Serial1.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
@@ -204,15 +204,15 @@ void loop()
       azcount = 0;
     } // endif
 
-    //  LCDUpdater();
-
+    
   } // endif
 
-  if (Serial2.available() > 0)  // ser3 is comms with the windows forms arduino monitoring app
+  if (Serial2.available() > 0)  // ser2 is comms with the windows forms arduino monitoring app
   {
-    String Ser3Data = Serial2.readStringUntil('#');
-    if (Ser3Data.indexOf("EncoderRequest", 0) > -1)
+    String Ser2Data = Serial2.readStringUntil('#');
+    if (Ser2Data.indexOf("EncoderRequest", 0) > -1)
     {
+            
       Serial2.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
       Serial2.print(String(azcount) + "#");
 
@@ -249,12 +249,6 @@ void encoder()
   {
     Azimuth = 360.0;
   }
-
-
-
-  // Serial1.print (String(Azimuth, 2)); //call the function and print the angle returned to serial
-  // Serial1.println("#");               // print the string terminator
-  // receivedData = "";
 
 }  // end void encoder
 
