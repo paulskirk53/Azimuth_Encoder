@@ -73,7 +73,7 @@ void WestSync();
 #define  NorthPin 18
 #define  EastPin  19
 #define  SouthPin 20
-#define  WestPin  21
+#define  WestPin  4
 
 //encoder:
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
@@ -86,17 +86,15 @@ long int flag_B = 0;
 
 //General
 String pkversion = "4.0";
-String blankline = "                ";
-String lcdazimuth;
-double Azimuth;                                         // to be returned when a TX call is processed by this arduino board
+double Azimuth;                                         // to be returned when a TX call is processed by this MCU
 float  SyncAz;
 long   azcount;
-long   Sendcount       = 0;
-long   pkinterval      = 0;
-long   pkstart         = 0;
-float  ticksperDomeRev = 10513.0;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
-long   calltime        = 0;
-
+long   Sendcount        = 0;
+long   pkinterval       = 0;
+long   pkstart          = 0;
+float  ticksperDomeRev  = 10513.0;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+long   calltime         = 0;
+      
 
 void setup()
 {
