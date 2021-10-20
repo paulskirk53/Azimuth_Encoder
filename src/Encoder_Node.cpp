@@ -79,10 +79,8 @@ void WestSync();
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
 // the position for 261 is set in Setup() below to reflect this.
 
-volatile long int A_Counter ;   // volatile because it's used in the interrupt routine
+volatile long A_Counter ;   // volatile because it's used in the interrupt routine
 
-
-long int flag_B = 0;
 
 //General
 String pkversion = "4.0";
@@ -92,9 +90,9 @@ long   azcount;
 long   Sendcount        = 0;
 long   pkinterval       = 0;
 long   pkstart          = 0;
-float  ticksperDomeRev  = 10513.0;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+float  ticksperDomeRev  = 10513;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long   calltime         = 0;
-      
+long remA_counter     ;
 
 void setup()
 {
@@ -137,8 +135,8 @@ void setup()
 
   azcount = 0;
 
-  A_Counter = ticksperDomeRev /(360 / 261)  ;      //  the position of due west - 261 for the dome when the scope is at 270.
-
+  A_Counter = ticksperDomeRev /(360.0 / 261.0)  ;      //  the position of due west - 261 for the dome when the scope is at 270.
+ remA_counter = A_Counter;
 
 }    // end setup
 
@@ -147,9 +145,13 @@ void loop()
 {
  // Serial.println("HERE");
   encoder();
-
+ // Serial.println(String(Azimuth) + "#  ");
+ // Serial.println(String(remA_counter));
+  //delay(1000);
   if (Serial.available() > 0)     // request from ASCOM Driver
   {
+    //Serial.print("A_Counter ");
+    // Serial.println(A_Counter);
     encoder();
     String ReceivedData = "";
 
@@ -173,8 +175,8 @@ void loop()
       if ((SyncAz > 0.0) && (SyncAz <= 360.0))   // check for a valid azimuth value
       {
         // now work out the tick position for this azimuth
-        // Number of ticks per degree is 28.481 - see comments at top of this code
-        A_Counter = SyncAz * 28.481;
+        
+        A_Counter = ticksperDomeRev/ (360/SyncAz);
       } // endif
     }  // endif
 
