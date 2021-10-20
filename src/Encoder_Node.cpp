@@ -92,7 +92,7 @@ long   pkinterval       = 0;
 long   pkstart          = 0;
 float  ticksperDomeRev  = 10513;         // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long   calltime         = 0;
-long remA_counter     ;
+
 
 void setup()
 {
@@ -136,7 +136,7 @@ void setup()
   azcount = 0;
 
   A_Counter = ticksperDomeRev /(360.0 / 261.0)  ;      //  the position of due west - 261 for the dome when the scope is at 270.
- remA_counter = A_Counter;
+ 
 
 }    // end setup
 
