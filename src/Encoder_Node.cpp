@@ -27,6 +27,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // and incorporates the Monitor program. 
 
 //NB the changes need testing as of this note 4-10-21 - remove this once tested
+//Oct 20th 21, following from the above line, the encoder has been tested with the code and AZ# and STA999# work reliably.
 
 //  Name:       Merged-Box-Azimuth_Encoder
 //   Created:  5-10-21
@@ -71,7 +72,7 @@ void WestSync();
 #define  A_PHASE  2      // USES PINS 2 AND 3 for encoder interrupt
 #define  B_PHASE  3
 #define  NorthPin 18
-#define  EastPin  19
+#define  EastPin  6
 #define  SouthPin 20
 #define  WestPin  4
 
