@@ -107,7 +107,7 @@ void setup()
   pinMode(WestPin,    INPUT_PULLUP);
 
 //todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
- pinMode(13,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+ pinMode(9,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
 //pinMode(13, INPUT_PULLUP);                   // see the notes in github. this pulls up the serial Rx pin to 5v.
 // notes for serial comms - 
   ASCOM.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
