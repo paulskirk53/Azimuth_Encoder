@@ -75,7 +75,10 @@ void WestSync();
 #define  EastPin  6
 #define  SouthPin 20
 #define  WestPin  4
-
+//
+#define ASCOM   Serial
+#define Stepper Serial1
+#define Monitor Serial2
 //encoder:
 //should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
 // the position for 261 is set in Setup() below to reflect this.
@@ -104,12 +107,12 @@ void setup()
   pinMode(WestPin,    INPUT_PULLUP);
 
 //todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
- // pinMode(17,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
-
+ pinMode(13,         INPUT_PULLUP);             //SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
+//pinMode(13, INPUT_PULLUP);                   // see the notes in github. this pulls up the serial Rx pin to 5v.
 // notes for serial comms - 
-  Serial.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
-  Serial1.begin(19200);   // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
-  Serial2.begin(19200);   // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
+  ASCOM.begin(19200);    // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
+  Stepper.begin(19200);   // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
+  Monitor.begin(19200);   // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
 
 
   // set up the LCD's number of columns and rows:
@@ -149,20 +152,20 @@ void loop()
  // Serial.println(String(Azimuth) + "#  ");
  // Serial.println(String(remA_counter));
   //delay(1000);
-  if (Serial.available() > 0)     // request from ASCOM Driver
+  if (ASCOM.available() > 0)     // request from ASCOM Driver
   {
     //Serial.print("A_Counter ");
     // Serial.println(A_Counter);
     encoder();
     String ReceivedData = "";
 
-    ReceivedData = Serial.readStringUntil('#');
+    ReceivedData = ASCOM.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1) //
     {
 
-      Serial.print(String(Azimuth) + "#");
+      ASCOM.print(String(Azimuth) + "#");
     }
 
 
@@ -186,18 +189,18 @@ void loop()
   }
   
 
-  if (Serial1.available() > 0)   // ser1 is encoder with stepper MCU
+  if (Stepper.available() > 0)   // ser1 is encoder with stepper MCU
   {
     encoder();
     String ReceivedData = "";
 
-    ReceivedData = Serial1.readStringUntil('#');
+    ReceivedData = Stepper.readStringUntil('#');
     // Serial1.print("received ");
     // Serial1.println(ReceivedData );
     if (ReceivedData.indexOf("AZ", 0) > -1)
     {
       azcount++;
-      Serial1.print(String(Azimuth) + "#");
+      Stepper.print(String(Azimuth) + "#");
     } // endif
 
     if (azcount > 999)
@@ -208,14 +211,14 @@ void loop()
     
   } // endif
 
-  if (Serial2.available() > 0)  // ser2 is comms with the windows forms arduino monitoring app
+  if (Monitor.available() > 0)  // ser2 is comms with the windows forms arduino monitoring app
   {
-    String Ser2Data = Serial2.readStringUntil('#');
+    String Ser2Data = Monitor.readStringUntil('#');
     if (Ser2Data.indexOf("EncoderRequest", 0) > -1)
     {
             
-      Serial2.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
-      Serial2.print(String(azcount) + "#");
+      Monitor.print(String(Azimuth) + "#");     // write the two monitoring values to the windows forms Arduino Monitor program
+      Monitor.print(String(azcount) + "#");
 
     } // Endif
 
