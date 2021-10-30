@@ -82,7 +82,7 @@ volatile long A_Counter; // volatile because it's used in the interrupt routine
 
 // General
 String pkversion      = "4.0";
-double Azimuth;                  // to be returned when a TX call is processed by this MCU
+float Azimuth;                  // to be returned when a TX call is processed by this MCU
 float SyncAz;
 long azcount;
 long Sendcount        = 0;
