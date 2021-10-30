@@ -68,6 +68,8 @@ bool PowerForCamera(bool State);
 #define SouthPin 20
 #define WestPin 4
 #define CameraPower 10
+#define off false
+#define on  true
 //
 #define ASCOM Serial
 #define Stepper Serial1
@@ -130,7 +132,7 @@ void setup()
 
   A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
 
-  PowerForCamera(false); // camera power is off by default
+  PowerForCamera(off); // camera power is off by default
 
 } // end setup
 
@@ -200,12 +202,12 @@ void loop()
 
     if (MonitorData.indexOf("CAMON", 0) > -1) //
     {
-      PowerForCamera(true);
+      PowerForCamera(on);
     }
 
     if (MonitorData.indexOf("CAMOFF", 0) > -1) //
     {
-      PowerForCamera(false);
+      PowerForCamera(off);
     }
 
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
