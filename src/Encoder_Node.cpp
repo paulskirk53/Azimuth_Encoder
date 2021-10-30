@@ -61,17 +61,17 @@ bool PowerForCamera(bool State);
 // end function declarations
 
 // encoder:
-#define A_PHASE 2 // USES PINS 2 AND 3 for encoder interrupt
-#define B_PHASE 3
-#define NorthPin 18
-#define EastPin 6
-#define SouthPin 20
-#define WestPin 4
+#define A_PHASE      2 // USES PINS 2 AND 3 for encoder interrupt
+#define B_PHASE      3
+#define NorthPin    18
+#define EastPin      6
+#define SouthPin    20
+#define WestPin      4
 #define CameraPower 10
 #define off false
 #define on  true
 //
-#define ASCOM Serial
+#define ASCOM   Serial
 #define Stepper Serial1
 #define Monitor Serial2
 // encoder:
@@ -81,29 +81,29 @@ bool PowerForCamera(bool State);
 volatile long A_Counter; // volatile because it's used in the interrupt routine
 
 // General
-String pkversion = "4.0";
-double Azimuth; // to be returned when a TX call is processed by this MCU
+String pkversion      = "4.0";
+double Azimuth;                  // to be returned when a TX call is processed by this MCU
 float SyncAz;
 long azcount;
-long Sendcount = 0;
-long pkinterval = 0;
-long pkstart = 0;
-float ticksperDomeRev = 10513; // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
-long calltime = 0;
+long Sendcount        = 0;
+long pkinterval       = 0;
+long pkstart          = 0;
+float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+long calltime         = 0;
 
 void setup()
 {
 
   pinMode(NorthPin, INPUT_PULLUP); // these are 4 microswitches for syncing the encoder
-  pinMode(EastPin, INPUT_PULLUP);
+  pinMode(EastPin,  INPUT_PULLUP);
   pinMode(SouthPin, INPUT_PULLUP);
-  pinMode(WestPin, INPUT_PULLUP);
+  pinMode(WestPin,  INPUT_PULLUP);
 
   // todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
   pinMode(9, INPUT_PULLUP); // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
   // pinMode(13, INPUT_PULLUP);                   // see the notes in github. this pulls up the serial Rx pin to 5v.
   //  notes for serial comms -
-  ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
+  ASCOM.begin  (19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
   Stepper.begin(19200); // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
   Monitor.begin(19200); // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
 
@@ -120,15 +120,15 @@ void setup()
 
   // interupts for the azimuth syncs below
   attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(EastPin),  EastSync,  RISING);
   attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(WestPin),  WestSync,  RISING);
 
   // lcd.setCursor(0, 0);
   // lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   // delay(1000);                                   //so the message above can be seen before it is overwritten
 
-  azcount = 0;
+  azcount   = 0;
 
   A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
 
