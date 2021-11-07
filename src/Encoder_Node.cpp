@@ -70,6 +70,7 @@ bool PowerForCamera(bool State);
 #define CameraPower 10
 #define off false
 #define on  true
+
 //
 #define ASCOM   Serial
 #define Stepper Serial1
@@ -90,6 +91,7 @@ long pkinterval       = 0;
 long pkstart          = 0;
 float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long calltime         = 0;
+bool cameraPowerState = off;
 
 void setup()
 {
@@ -119,9 +121,9 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(A_PHASE), interrupt, RISING); // interrupt for the encoder device
 
   // interupts for the azimuth syncs below
-  attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
+  //attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt(EastPin),  EastSync,  RISING);
-  attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
+  //attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt(WestPin),  WestSync,  RISING);
 
   // lcd.setCursor(0, 0);
@@ -133,7 +135,7 @@ void setup()
   A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
 
   PowerForCamera(off); // camera power is off by default
-
+ 
 } // end setup
 
 void loop()
@@ -203,11 +205,13 @@ void loop()
     if (MonitorData.indexOf("CAMON", 0) > -1) //
     {
       PowerForCamera(on);
+      
     }
 
     if (MonitorData.indexOf("CAMOFF", 0) > -1) //
     {
       PowerForCamera(off);
+      
     }
 
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
@@ -215,6 +219,15 @@ void loop()
 
       Monitor.print(String(Azimuth) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
       Monitor.print(String(azcount) + "#");
+      //check status of the power to the camera and print to monitor program
+      if(cameraPowerState)
+      {
+        Monitor.print("ON");
+      }
+      else
+      {
+        Monitor.print("OFF");
+      }
 
     } // Endif
 
@@ -294,9 +307,11 @@ bool PowerForCamera(bool State)
   if (State)
   {
     digitalWrite(CameraPower, HIGH);
+    cameraPowerState = on;    
   }
   else
   {
     digitalWrite(CameraPower, LOW);
+    cameraPowerState = off;    
   }
 }
