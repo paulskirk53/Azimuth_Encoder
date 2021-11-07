@@ -222,11 +222,11 @@ void loop()
       //check status of the power to the camera and print to monitor program
       if(cameraPowerState)
       {
-        Monitor.print("ON");
+        Monitor.print("ON#");
       }
       else
       {
-        Monitor.print("OFF");
+        Monitor.print("OFF#");
       }
 
     } // Endif
