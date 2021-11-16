@@ -70,6 +70,7 @@ bool PowerForCamera(bool State);
 #define CameraPower 10
 #define off false
 #define on  true
+#define ledPin 7
 
 //
 #define ASCOM   Serial
@@ -100,6 +101,7 @@ void setup()
   pinMode(EastPin,  INPUT_PULLUP);
   pinMode(SouthPin, INPUT_PULLUP);
   pinMode(WestPin,  INPUT_PULLUP);
+  pinMode(ledPin,  OUTPUT);
 
   // todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
   pinMode(9, INPUT_PULLUP); // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
@@ -150,8 +152,18 @@ void loop()
     // Serial.print("A_Counter ");
     //  Serial.println(A_Counter);
     encoder();
-    String ReceivedData = "";
 
+    String ReceivedData = "";
+    if ( digitalRead(ledPin) == LOW  )
+      {
+      digitalWrite (ledPin, HIGH);
+      //ASCOM.println("Setting HIGH");
+      }
+    else
+      {
+        digitalWrite(ledPin,LOW);
+        //ASCOM.println("Setting LOW");
+      }
     ReceivedData = ASCOM.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
