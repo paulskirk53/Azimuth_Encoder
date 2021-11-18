@@ -70,7 +70,8 @@ bool PowerForCamera(bool State);
 #define CameraPower 10
 #define off false
 #define on  true
-#define ledPin 7
+#define ledPin       7
+#define MCU_Reset   12
 
 //
 #define ASCOM   Serial
@@ -96,7 +97,8 @@ bool cameraPowerState = off;
 
 void setup()
 {
-
+  pinMode (MCU_Reset, OUTPUT);
+  digitalWrite(MCU_Reset, HIGH);    // keep the pin high at startup to avoid a reset
   pinMode(NorthPin, INPUT_PULLUP); // these are 4 microswitches for syncing the encoder
   pinMode(EastPin,  INPUT_PULLUP);
   pinMode(SouthPin, INPUT_PULLUP);
@@ -210,9 +212,15 @@ void loop()
 
   } // endif
 
-  if (Monitor.available() > 0) // ser2 is comms with the windows forms arduino monitoring app
+  if (Monitor.available() > 0) // Monitor is comms with the windows forms arduino monitoring app
   {
     String MonitorData = Monitor.readStringUntil('#');
+
+    if (MonitorData.indexOf("reset", 0) > -1) //
+      {
+        digitalWrite(MCU_Reset, LOW);    // low resets the MCU
+        
+      }
 
     if (MonitorData.indexOf("CAMON", 0) > -1) //
     {
