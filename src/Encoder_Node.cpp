@@ -219,7 +219,8 @@ void loop()
     if (MonitorData.indexOf("reset", 0) > -1) //
       {
         digitalWrite(MCU_Reset, LOW);    // low resets the MCU
-        
+        delay(1000);
+        digitalWrite(MCU_Reset, HIGH);  //  HIGH FOR mcu TO RUN
       }
 
     if (MonitorData.indexOf("CAMON", 0) > -1) //
