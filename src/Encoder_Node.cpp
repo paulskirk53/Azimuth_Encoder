@@ -45,7 +45,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // East = ticksperDomeRev/4
 // South = ticksperDomeRev/2
 // West = ticksperDomeRev*3/4
-
+#include <avr/cpufunc.h> /* Required header file */
 #include <Arduino.h>
 
 // function declarations
@@ -57,6 +57,7 @@ void EastSync();
 void SouthSync();
 void WestSync();
 bool PowerForCamera(bool State);
+void resetViaSWR();
 
 // end function declarations
 
@@ -71,7 +72,7 @@ bool PowerForCamera(bool State);
 #define off false
 #define on  true
 #define ledPin       7
-#define MCU_Reset   12
+
 
 //
 #define ASCOM   Serial
@@ -97,8 +98,7 @@ bool cameraPowerState = off;
 
 void setup()
 {
-  pinMode (MCU_Reset, OUTPUT);
-  digitalWrite(MCU_Reset, HIGH);    // keep the pin high at startup to avoid a reset
+
   pinMode(NorthPin, INPUT_PULLUP); // these are 4 microswitches for syncing the encoder
   pinMode(EastPin,  INPUT_PULLUP);
   pinMode(SouthPin, INPUT_PULLUP);
@@ -139,7 +139,9 @@ void setup()
   A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
 
   PowerForCamera(off); // camera power is off by default
- 
+ // delay(15000);            //THIS DELAY is set to give the operator time to open com12 (ASCOM port) to check if the message below arrives tested ok 22/11/21
+// ASCOM.print("MCU RESET");
+
 } // end setup
 
 void loop()
@@ -218,9 +220,7 @@ void loop()
 
     if (MonitorData.indexOf("reset", 0) > -1) //
       {
-        digitalWrite(MCU_Reset, LOW);    // low resets the MCU
-        delay(1000);
-        digitalWrite(MCU_Reset, HIGH);  //  HIGH FOR mcu TO RUN
+       resetViaSWR();
       }
 
     if (MonitorData.indexOf("CAMON", 0) > -1) //
@@ -335,4 +335,8 @@ bool PowerForCamera(bool State)
     digitalWrite(CameraPower, LOW);
     cameraPowerState = off;    
   }
+}
+void resetViaSWR()
+{
+  _PROTECTED_WRITE(RSTCTRL.SWRR,1);
 }
