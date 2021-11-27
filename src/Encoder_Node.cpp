@@ -58,6 +58,7 @@ void SouthSync();
 void WestSync();
 bool PowerForCamera(bool State);
 void resetViaSWR();
+void lightup();
 
 // end function declarations
 
@@ -107,7 +108,7 @@ void setup()
 
   // todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
   pinMode(9, INPUT_PULLUP); // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
-  // pinMode(13, INPUT_PULLUP);                   // see the notes in github. this pulls up the serial Rx pin to 5v.
+  
   //  notes for serial comms -
   ASCOM.begin  (19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
   Stepper.begin(19200); // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
@@ -141,6 +142,9 @@ void setup()
   PowerForCamera(off); // camera power is off by default
  // delay(15000);            //THIS DELAY is set to give the operator time to open com12 (ASCOM port) to check if the message below arrives tested ok 22/11/21
 // ASCOM.print("MCU RESET");
+
+lightup();
+
 
 } // end setup
 
@@ -339,4 +343,15 @@ bool PowerForCamera(bool State)
 void resetViaSWR()
 {
   _PROTECTED_WRITE(RSTCTRL.SWRR,1);
+}
+void lightup()
+{
+  for (int i=0; i<10; i++)
+{
+  digitalWrite(ledPin, HIGH);
+  delay(1000);
+  digitalWrite(ledPin, LOW);
+  delay(1000);
+}
+
 }
