@@ -51,6 +51,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // function declarations
 
 void encoder();
+
 void interrupt();
 void NorthSync();
 void EastSync();
@@ -91,7 +92,6 @@ float Azimuth;                  // to be returned when a TX call is processed by
 float SyncAz;
 long azcount;
 long Sendcount        = 0;
-long pkinterval       = 0;
 long pkstart          = 0;
 float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long calltime         = 0;
@@ -152,6 +152,7 @@ void loop()
 {
   // Serial.println("HERE");
   encoder();
+  
   // Serial.println(String(Azimuth) + "#  ");
   // Serial.println(String(remA_counter));
   // delay(1000);
@@ -242,8 +243,8 @@ void loop()
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
     {
 
-      Monitor.print(String(Azimuth) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
-      Monitor.print(String(azcount) + "#");
+      Monitor.print(String(Azimuth) + "#" + String(azcount) + "#" ); // write the two monitoring values to the windows forms Arduino Monitor program
+     // Monitor.print(String(azcount) + "#");
       //check status of the power to the camera and print to monitor program
       if(cameraPowerState)
       {
