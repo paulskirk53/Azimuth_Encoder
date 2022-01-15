@@ -4,19 +4,12 @@
 
 Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note
 
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch argh, argh, argh
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
-This is the Merged-Box-Azimuth_Encoder branch
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
+This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
 
 Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note
 */
@@ -67,13 +60,13 @@ void lightup();
 #define A_PHASE      2 // USES PINS 2 AND 3 for encoder interrupt
 #define B_PHASE      3
 #define NorthPin    18
-#define EastPin      6
+#define EastPin     28 //changed for SPI
 #define SouthPin    20
-#define WestPin      4
+#define WestPin     29  // changed for spi
 #define CameraPower 10
 #define off false
 #define on  true
-#define ledPin       7
+#define ledPin       12 // change for spi
 
 
 //
