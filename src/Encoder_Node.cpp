@@ -40,6 +40,10 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // West = ticksperDomeRev*3/4
 #include <avr/cpufunc.h> /* Required header file */
 #include <Arduino.h>
+#include <SPI.h>
+// from microchip example below
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 // function declarations
 
@@ -53,6 +57,7 @@ void WestSync();
 bool PowerForCamera(bool State);
 void resetViaSWR();
 void lightup();
+static void SPI0_init(void);
 
 // end function declarations
 
@@ -81,7 +86,9 @@ volatile long A_Counter; // volatile because it's used in the interrupt routine
 
 // General
 String pkversion      = "4.0";
-float Azimuth;                  // to be returned when a TX call is processed by this MCU
+float Azimuth;                  // The data type is important to avoid integer arithmetic in the encoder() routine
+uint16_t integerAzimuth;        // this is what is returned to the stepper routine by SPI - just to avoid the complication of sending float over SPI
+                                // and also because we really don't need fractional degrees for dome movement.
 float SyncAz;
 long azcount;
 long Sendcount        = 0;
@@ -89,6 +96,13 @@ long pkstart          = 0;
 float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long calltime         = 0;
 bool cameraPowerState = off;
+
+//to be returned via SPI to the Stepper routine - the bytes represent the Azimuth
+volatile byte highByteReturn ;
+volatile byte lowByteReturn ;
+
+// to hold the incoming request from master
+volatile char SPIReceipt;
 
 void setup()
 {
@@ -115,7 +129,6 @@ void setup()
   pinMode(B_PHASE, INPUT);
 
   // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 (no pin limit)restrictions on 4809)
-
   attachInterrupt(digitalPinToInterrupt(A_PHASE), interrupt, RISING); // interrupt for the encoder device
 
   // interupts for the azimuth syncs below
@@ -138,6 +151,16 @@ void setup()
 
 lightup();
 
+// SPI stuff
+
+  SPI0_init();
+
+  // interrupt for SPI servicing
+  // SPI.attachInterrupt();
+  // send data on MISO
+  // pinMode (MISO, OUTPUT);
+
+sei(); /* Enable Global Interrupts */
 
 } // end setup
 
@@ -145,6 +168,7 @@ void loop()
 {
   // Serial.println("HERE");
   encoder();
+
   
   // Serial.println(String(Azimuth) + "#  ");
   // Serial.println(String(remA_counter));
@@ -281,6 +305,10 @@ void encoder()
   {
     Azimuth = 360.0;
   }
+  // now store the float azimuth into an uint16_t and for the highbyte and lowbyte for spi transmission to the Stepper routine
+  integerAzimuth = Azimuth;                         // REMEMBER Azimuth needs to be float due to effects of integer arithmetic.
+  lowByteReturn = lowByte(integerAzimuth);
+  highByteReturn = highByte(integerAzimuth);
 
 } // end void encoder
 
@@ -348,4 +376,42 @@ void lightup()
   delay(1000);
 }
 
+}
+
+
+// SPI interrupt routine
+ISR(SPI0_INT_vect)                                     // was this in arduino -> (SPI_STC_vect)
+{
+  SPIReceipt = SPI0.DATA;
+  
+  if (SPIReceipt == 'A')    // a dummy transaction which loads the SPDR with the low byte
+  {                         // in readiness for the 'L' transaction
+    SPI0.DATA = lowByteReturn;
+  }
+  if (SPIReceipt == 'L')    // low byte is returned and SPDR is loaded with the high byte
+  {                         // in readiness for the 'H' transaction
+    SPI0.DATA = highByteReturn;
+  }
+
+  if (SPIReceipt == 'H')     // High byte is returned and SPDR is loaded with zero
+  {                          // in readiness for the 'L' transaction
+    SPI0.DATA = 0x00;        // fill spdr with 0
+  }
+
+    SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
+
+}  // end of interrupt routine SPI_STC_vect
+
+static void SPI0_init(void)
+{
+    PORTA.DIR &= ~PIN4_bm; /* Set MOSI pin direction to input */
+    PORTA.DIR |= PIN5_bm;  /* Set MISO pin direction to output */
+    PORTA.DIR &= ~PIN6_bm; /* Set SCK pin direction to input */
+    PORTA.DIR &= ~PIN7_bm; /* Set SS pin direction to input */
+
+    SPI0.CTRLA = SPI_DORD_bm        /* LSB is transmitted first */
+               | SPI_ENABLE_bm      /* Enable module */
+               & (~SPI_MASTER_bm);     /* SPI module in Slave mode */
+
+    SPI0.INTCTRL = SPI_IE_bm; /* SPI Interrupt enable */
 }
