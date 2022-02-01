@@ -90,7 +90,7 @@ float Azimuth;                  // The data type is important to avoid integer a
 uint16_t integerAzimuth;        // this is what is returned to the stepper routine by SPI - just to avoid the complication of sending float over SPI
                                 // and also because we really don't need fractional degrees for dome movement.
 float SyncAz;
-long azcount;
+volatile int  azcount;
 long Sendcount        = 0;
 long pkstart          = 0;
 float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
@@ -261,6 +261,11 @@ void loop()
     {
 
       Monitor.print(String(Azimuth) + "#" + String(azcount) + "#" ); // write the two monitoring values to the windows forms Arduino Monitor program
+      if (azcount > 999)
+        {
+          azcount = 0;
+        } // endif
+        
      // Monitor.print(String(azcount) + "#");
       //check status of the power to the camera and print to monitor program
       if(cameraPowerState)
@@ -396,6 +401,7 @@ ISR(SPI0_INT_vect)                                     // was this in arduino ->
   if (SPIReceipt == 'H')     // High byte is returned and SPDR is loaded with zero
   {                          // in readiness for the 'L' transaction
     SPI0.DATA = 0x00;        // fill spdr with 0
+    azcount++;               //counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live 
   }
 
     SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
