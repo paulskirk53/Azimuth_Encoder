@@ -2,6 +2,7 @@
 //  note the todo items in this file and make the changes indicated
 /*
 
+
 Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note
 
 This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
@@ -40,7 +41,7 @@ Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note 
 // West = ticksperDomeRev*3/4
 #include <avr/cpufunc.h> /* Required header file */
 #include <Arduino.h>
-#include <SPI.h>
+#include <SPI.h> // SET UP AS SPI SLAVE
 // from microchip example below
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -62,20 +63,19 @@ static void SPI0_init(void);
 // end function declarations
 
 // encoder:
-#define A_PHASE      2 // USES PINS 2 AND 3 for encoder interrupt
-#define B_PHASE      3
-#define NorthPin    18
-#define EastPin     28 //changed for SPI
-#define SouthPin    20
-#define WestPin     29  // changed for spi
+#define A_PHASE 2 // USES PINS 2 AND 3 for encoder interrupt
+#define B_PHASE 3
+#define NorthPin 18
+#define EastPin 28 // changed for SPI
+#define SouthPin 20
+#define WestPin 29 // changed for spi
 #define CameraPower 10
 #define off false
-#define on  true
-#define ledPin       12 // change for spi
-
+#define on true
+#define ledPin 12 // change for spi
 
 //
-#define ASCOM   Serial
+#define ASCOM Serial
 #define Stepper Serial1
 #define Monitor Serial2
 // encoder:
@@ -85,21 +85,21 @@ static void SPI0_init(void);
 volatile long A_Counter; // volatile because it's used in the interrupt routine
 
 // General
-String pkversion      = "4.0";
-float Azimuth;                  // The data type is important to avoid integer arithmetic in the encoder() routine
-uint16_t integerAzimuth;        // this is what is returned to the stepper routine by SPI - just to avoid the complication of sending float over SPI
-                                // and also because we really don't need fractional degrees for dome movement.
+String pkversion = "4.0";
+float Azimuth;           // The data type is important to avoid integer arithmetic in the encoder() routine
+uint16_t integerAzimuth; // this is what is returned to the stepper routine by SPI - just to avoid the complication of sending float over SPI
+                         // and also because we really don't need fractional degrees for dome movement.
 float SyncAz;
-volatile int  azcount;
-long Sendcount        = 0;
-long pkstart          = 0;
-float ticksperDomeRev = 10513;   // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
-long calltime         = 0;
+volatile int azcount;
+long Sendcount = 0;
+long pkstart = 0;
+float ticksperDomeRev = 10513; // this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+long calltime = 0;
 bool cameraPowerState = off;
 
-//to be returned via SPI to the Stepper routine - the bytes represent the Azimuth
-volatile byte highByteReturn ;
-volatile byte lowByteReturn ;
+// to be returned via SPI to the Stepper routine - the bytes represent the Azimuth
+volatile byte highByteReturn;
+volatile byte lowByteReturn;
 
 // to hold the incoming request from master
 volatile char SPIReceipt;
@@ -108,16 +108,16 @@ void setup()
 {
 
   pinMode(NorthPin, INPUT_PULLUP); // these are 4 microswitches for syncing the encoder
-  pinMode(EastPin,  INPUT_PULLUP);
+  pinMode(EastPin, INPUT_PULLUP);
   pinMode(SouthPin, INPUT_PULLUP);
-  pinMode(WestPin,  INPUT_PULLUP);
-  pinMode(ledPin,  OUTPUT);
+  pinMode(WestPin, INPUT_PULLUP);
+  pinMode(ledPin, OUTPUT);
 
   // todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
   pinMode(9, INPUT_PULLUP); // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
-  
+
   //  notes for serial comms -
-  ASCOM.begin  (19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
+  ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
   Stepper.begin(19200); // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
   Monitor.begin(19200); // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
 
@@ -132,26 +132,24 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(A_PHASE), interrupt, RISING); // interrupt for the encoder device
 
   // interupts for the azimuth syncs below
-  //attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(EastPin),  EastSync,  RISING);
-  //attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(WestPin),  WestSync,  RISING);
+  // attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
+  // attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, RISING);
 
   // lcd.setCursor(0, 0);
   // lcd.print("Az MCU Ver " + pkversion);                 //16 char display
   // delay(1000);                                   //so the message above can be seen before it is overwritten
 
-  azcount   = 0;
+  azcount = 0;
 
   A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
 
   PowerForCamera(off); // camera power is off by default
- // delay(15000);            //THIS DELAY is set to give the operator time to open com12 (ASCOM port) to check if the message below arrives tested ok 22/11/21
-// ASCOM.print("MCU RESET");
+                       // delay(15000);            //THIS DELAY is set to give the operator time to open com12 (ASCOM port) to check if the message below arrives tested ok 22/11/21
+                       // ASCOM.print("MCU RESET");
 
-lightup();
-
-// SPI stuff
+  // SPI stuff - NOTE that the encoder is the SPI slave
 
   SPI0_init();
 
@@ -160,7 +158,10 @@ lightup();
   // send data on MISO
   // pinMode (MISO, OUTPUT);
 
-sei(); /* Enable Global Interrupts */
+  sei(); /* Enable Global Interrupts */
+
+  // the code below flashes LED five times causing 5 second delay
+  lightup();
 
 } // end setup
 
@@ -169,7 +170,6 @@ void loop()
   // Serial.println("HERE");
   encoder();
 
-  
   // Serial.println(String(Azimuth) + "#  ");
   // Serial.println(String(remA_counter));
   // delay(1000);
@@ -180,16 +180,16 @@ void loop()
     encoder();
 
     String ReceivedData = "";
-    if ( digitalRead(ledPin) == LOW  )
-      {
-      digitalWrite (ledPin, HIGH);
-      //ASCOM.println("Setting HIGH");
-      }
+    if (digitalRead(ledPin) == LOW)
+    {
+      digitalWrite(ledPin, HIGH);
+      // ASCOM.println("Setting HIGH");
+    }
     else
-      {
-        digitalWrite(ledPin,LOW);
-        //ASCOM.println("Setting LOW");
-      }
+    {
+      digitalWrite(ledPin, LOW);
+      // ASCOM.println("Setting LOW");
+    }
     ReceivedData = ASCOM.readStringUntil('#');
     // Serial.print("received ");
     // Serial.println(ReceivedData );
@@ -241,34 +241,32 @@ void loop()
     String MonitorData = Monitor.readStringUntil('#');
 
     if (MonitorData.indexOf("reset", 0) > -1) //
-      {
-       resetViaSWR();
-      }
+    {
+      resetViaSWR();
+    }
 
     if (MonitorData.indexOf("CAMON", 0) > -1) //
     {
       PowerForCamera(on);
-      
     }
 
     if (MonitorData.indexOf("CAMOFF", 0) > -1) //
     {
       PowerForCamera(off);
-      
     }
 
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
     {
 
-      Monitor.print(String(Azimuth) + "#" + String(azcount) + "#" ); // write the two monitoring values to the windows forms Arduino Monitor program
+      Monitor.print(String(Azimuth) + "#" + String(azcount) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
       if (azcount > 999)
-        {
-          azcount = 0;
-        } // endif
-        
-     // Monitor.print(String(azcount) + "#");
-      //check status of the power to the camera and print to monitor program
-      if(cameraPowerState)
+      {
+        azcount = 0;
+      } // endif
+
+      // Monitor.print(String(azcount) + "#");
+      // check status of the power to the camera and print to monitor program
+      if (cameraPowerState)
       {
         Monitor.print("ON#");
       }
@@ -311,7 +309,7 @@ void encoder()
     Azimuth = 360.0;
   }
   // now store the float azimuth into an uint16_t and for the highbyte and lowbyte for spi transmission to the Stepper routine
-  integerAzimuth = Azimuth;                         // REMEMBER Azimuth needs to be float due to effects of integer arithmetic.
+  integerAzimuth = Azimuth; // REMEMBER Azimuth needs to be float due to effects of integer arithmetic.
   lowByteReturn = lowByte(integerAzimuth);
   highByteReturn = highByte(integerAzimuth);
 
@@ -359,65 +357,63 @@ bool PowerForCamera(bool State)
   if (State)
   {
     digitalWrite(CameraPower, HIGH);
-    cameraPowerState = on;    
+    cameraPowerState = on;
   }
   else
   {
     digitalWrite(CameraPower, LOW);
-    cameraPowerState = off;    
+    cameraPowerState = off;
   }
 }
 void resetViaSWR()
 {
-  _PROTECTED_WRITE(RSTCTRL.SWRR,1);
+  _PROTECTED_WRITE(RSTCTRL.SWRR, 1);
 }
 void lightup()
 {
-  for (int i=0; i<10; i++)
-{
-  digitalWrite(ledPin, HIGH);
-  delay(1000);
-  digitalWrite(ledPin, LOW);
-  delay(1000);
+  for (int i = 0; i < 5; i++)
+  {
+    digitalWrite(ledPin, HIGH);
+    delay(1000);
+    digitalWrite(ledPin, LOW);
+    delay(1000);
+  }
 }
-
-}
-
 
 // SPI interrupt routine
-ISR(SPI0_INT_vect)                                     // was this in arduino -> (SPI_STC_vect)
+ISR(SPI0_INT_vect) // was this in arduino -> (SPI_STC_vect)
 {
   SPIReceipt = SPI0.DATA;
-  
-  if (SPIReceipt == 'A')    // a dummy transaction which loads the SPDR with the low byte
-  {                         // in readiness for the 'L' transaction
+
+  if (SPIReceipt == 'A') // a dummy transaction which loads the SPDR with the low byte
+  {                      // in readiness for the 'L' transaction
     SPI0.DATA = lowByteReturn;
   }
-  if (SPIReceipt == 'L')    // low byte is returned and SPDR is loaded with the high byte
-  {                         // in readiness for the 'H' transaction
+  if (SPIReceipt == 'L') // low byte is returned and SPDR is loaded with the high byte
+  {                      // in readiness for the 'H' transaction
     SPI0.DATA = highByteReturn;
   }
 
-  if (SPIReceipt == 'H')     // High byte is returned and SPDR is loaded with zero
-  {                          // in readiness for the 'L' transaction
-    SPI0.DATA = 0x00;        // fill spdr with 0
-    azcount++;               //counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live 
+  if (SPIReceipt == 'H') // High byte is returned and SPDR is loaded with zero
+  {                      // in readiness for the 'L' transaction
+    SPI0.DATA = 0x00;    // fill spdr with 0
+    azcount++;           // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
   }
 
-    SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
+  SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
 
-}  // end of interrupt routine SPI_STC_vect
+} // end of interrupt routine SPI_STC_vect
 
 static void SPI0_init(void)
 {
-    PORTA.DIR &= ~PIN4_bm; /* Set MOSI pin direction to input */
-    PORTA.DIR |= PIN5_bm;  /* Set MISO pin direction to output */
-    PORTA.DIR &= ~PIN6_bm; /* Set SCK pin direction to input */
-    PORTA.DIR &= ~PIN7_bm; /* Set SS pin direction to input */
+  PORTA.DIR &= ~PIN4_bm; /* Set MOSI pin direction to input */
+  PORTA.DIR |= PIN5_bm;  /* Set MISO pin direction to output */
+  PORTA.DIR &= ~PIN6_bm; /* Set SCK pin direction to input */
+  PORTA.DIR &= ~PIN7_bm; /* Set SS pin direction to input */
 
-    SPI0.CTRLA = SPI_DORD_bm        /* LSB is transmitted first */
-               | SPI_ENABLE_bm      /* Enable module */
-               & (~SPI_MASTER_bm);     /* SPI module in Slave mode */
+  SPI0.CTRLA = SPI_DORD_bm               /* LSB is transmitted first */
+               | SPI_ENABLE_bm           /* Enable module */
+                     & (~SPI_MASTER_bm); /* SPI module in Slave mode */
 
-    SPI0.INTCTRL = SPI_IE_bm; /* SPI Interrupt enable */
+  SPI0.INTCTRL = SPI_IE_bm; /* SPI Interrupt enable */
 }
