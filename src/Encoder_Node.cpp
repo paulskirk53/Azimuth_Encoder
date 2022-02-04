@@ -258,11 +258,13 @@ void loop()
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
     {
 
-      Monitor.print(String(Azimuth) + "#" + String(azcount) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
       if (azcount > 999)
       {
         azcount = 0;
       } // endif
+      
+      Monitor.print(String(Azimuth) + "#" + String(azcount) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
+
 
       // Monitor.print(String(azcount) + "#");
       // check status of the power to the camera and print to monitor program
