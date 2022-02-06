@@ -240,6 +240,11 @@ void loop()
   {
     String MonitorData = Monitor.readStringUntil('#');
 
+        if (MonitorData.indexOf("test", 0) > -1)
+    {
+      Monitor.print("encoder#");
+    }
+
     if (MonitorData.indexOf("reset", 0) > -1) //
     {
       resetViaSWR();
