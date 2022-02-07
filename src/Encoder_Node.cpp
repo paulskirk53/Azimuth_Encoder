@@ -239,8 +239,10 @@ void loop()
   if (Monitor.available() > 0) // Monitor is comms with the windows forms arduino monitoring app
   {
     String MonitorData = Monitor.readStringUntil('#');
+    //todo remove line below
+     ASCOM.print(MonitorData);
 
-        if (MonitorData.indexOf("test", 0) > -1)
+        if (MonitorData.indexOf("encoder", 0) > -1)
     {
       Monitor.print("encoder#");
     }
