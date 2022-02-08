@@ -229,7 +229,7 @@ void loop()
       Stepper.print(String(Azimuth) + "#");
     } // endif
 
-    if (azcount > 999)
+    if (azcount > 250)
     {
       azcount = 0;
     } // endif
@@ -265,7 +265,7 @@ void loop()
     if (MonitorData.indexOf("EncoderRequest", 0) > -1)
     {
 
-      if (azcount > 999)
+      if (azcount > 240)
       {
         azcount = 0;
       } // endif
