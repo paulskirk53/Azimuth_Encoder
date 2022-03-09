@@ -1,29 +1,17 @@
-// code formatter id shift alt f
+// code formatter id shift alt f - don't use it unless it can be modded to meet the standards used in my code
 //  note the todo items in this file and make the changes indicated
 /*
 
-
-Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note
-
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-This is the with SPI-Comms version - undergoing changes to incorporate SPI between the MCUs
-
-Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note Note
+ Note Note Note Note Note Note Note
 */
 
 // This code has been modified to remove the LCD
 //  and incorporates the Monitor program.
 
-// NB the changes need testing as of this note 4-10-21 - remove this once tested
-// Oct 20th 21, following from the above line, the encoder has been tested with the code and AZ# and STA999# work reliably.
 
 //  Name:       Merged-Box-Azimuth_Encoder
 //   Created:  5-10-21
-//   Author:     DESKTOP-OCFJAV9\Paul
+//   Author:    Paul Kirk
 
 // if it's required to set a home point or park point marker A_Counter is the variable which must be set.
 // see below for north, east, south, west values for A_Counter
@@ -83,7 +71,7 @@ static void SPI0_init(void);
 //  the position for 261 is set in Setup() below to reflect this.
 
 volatile long A_Counter; // volatile because it's used in the interrupt routine
-
+volatile bool homeFlag;
 // General
 String pkversion = "4.0";
 float Azimuth;           // The data type is important to avoid integer arithmetic in the encoder() routine
@@ -288,6 +276,10 @@ void loop()
 
   } // endif
 
+
+  homeFlag = false;             // this is set true by the westsync interrupt, so at the end of each loop, set it false
+
+
 } // end void loop
 
 void encoder()
@@ -356,9 +348,10 @@ void SouthSync()
 {
   A_Counter = ticksperDomeRev / 2.0;
 }
-void WestSync()
+void WestSync()                              //this acts as the home position
 {
-  A_Counter = ticksperDomeRev * 0.75;
+  A_Counter = ticksperDomeRev / (360.0 / 261.0);     // set the azimuth to 261 degrees (west)
+  homeFlag= true;                                    // set this for transmission to the stepper when home is found
 }
 
 bool PowerForCamera(bool State)
@@ -404,7 +397,7 @@ ISR(SPI0_INT_vect) // was this in arduino -> (SPI_STC_vect)
   }
 
   if (SPIReceipt == 'H') // High byte is returned and SPDR is loaded with zero
-  {                      // in readiness for the 'L' transaction
+  {                      // in readiness for the 'A' transaction
     SPI0.DATA = 0x00;    // fill spdr with 0
     azcount++;           // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
   }
