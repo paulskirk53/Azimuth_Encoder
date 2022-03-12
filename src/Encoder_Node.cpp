@@ -108,7 +108,8 @@ void setup()
   ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
   Stepper.begin(19200); // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
   Monitor.begin(19200); // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
-
+ // delay(10000);
+// ASCOM.print("here");
   // set up the LCD's number of columns and rows:
   // lcd.begin(16, 2);
 
@@ -148,8 +149,8 @@ void setup()
 
   sei(); /* Enable Global Interrupts */
 
-  // the code below flashes LED five times causing 5 second delay
-  lightup();
+  // the code below flashes LED five times causing 5 second delay TODO - REMOVE COMMENTS
+   lightup();
 
 } // end setup
 
@@ -396,10 +397,16 @@ ISR(SPI0_INT_vect) // was this in arduino -> (SPI_STC_vect)
     SPI0.DATA = highByteReturn;
   }
 
-  if (SPIReceipt == 'H') // High byte is returned and SPDR is loaded with zero
-  {                      // in readiness for the 'A' transaction
-    SPI0.DATA = 0x00;    // fill spdr with 0
-    azcount++;           // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
+  if (SPIReceipt == 'H')    // High byte is returned and SPDR is loaded with homeflag
+  {                         // in readiness for the 'S' transaction
+    SPI0.DATA = homeFlag;   // sends status of the home position true if at the home position i.e. the sensor has been activated
+    
+  }
+  
+    if (SPIReceipt == 'S')  // Homeflag is returned and SPDR is loaded with zero
+  {                         // in readiness for the next 'A' transaction
+    SPI0.DATA = 0x00;       // fill spdr with 0
+    azcount++;              // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
   }
 
   SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
