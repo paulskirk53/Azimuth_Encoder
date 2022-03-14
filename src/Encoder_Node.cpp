@@ -124,7 +124,7 @@ void setup()
   // attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
   // attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, FALLING);       // changed to falling as the pin is active low todo if need to change back 14-3-22
 
   // lcd.setCursor(0, 0);
   // lcd.print("Az MCU Ver " + pkversion);                 //16 char display
@@ -229,7 +229,7 @@ void loop()
   {
     String MonitorData = Monitor.readStringUntil('#');
     //todo remove line below
-     ASCOM.print(MonitorData);
+    // ASCOM.print(MonitorData);
 
         if (MonitorData.indexOf("encoder", 0) > -1)
     {
@@ -261,7 +261,6 @@ void loop()
       
       Monitor.print(String(Azimuth) + "#" + String(azcount) + "#"); // write the two monitoring values to the windows forms Arduino Monitor program
 
-
       // Monitor.print(String(azcount) + "#");
       // check status of the power to the camera and print to monitor program
       if (cameraPowerState)
@@ -277,6 +276,13 @@ void loop()
 
   } // endif
 
+/*
+if (homeFlag==true)
+{
+  ASCOM.println("homeflag is LOW");    // this worked properly when the westpin was grounded temporarily
+}
+
+*/
 
   homeFlag = false;             // this is set true by the westsync interrupt, so at the end of each loop, set it false
 
@@ -343,11 +349,11 @@ void NorthSync()
 }
 void EastSync()
 {
-  A_Counter = ticksperDomeRev / 4.0;
+  A_Counter = ticksperDomeRev / (360.0 / 90.0);     // on reflection these positions are not true i.e. 90.0 is not the right value to use for dome east
 }
 void SouthSync()
 {
-  A_Counter = ticksperDomeRev / 2.0;
+  A_Counter = ticksperDomeRev / 2.0;                // same comment as above
 }
 void WestSync()                              //this acts as the home position
 {
