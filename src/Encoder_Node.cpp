@@ -396,10 +396,15 @@ ISR(SPI0_INT_vect) // was this in arduino -> (SPI_STC_vect)
     SPI0.DATA = highByteReturn;
   }
 
-  if (SPIReceipt == 'H') // High byte is returned and SPDR is loaded with zero
-  {                      // in readiness for the 'A' transaction
-    SPI0.DATA = 0x00;    // fill spdr with 0
-    azcount++;           // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
+  if (SPIReceipt == 'H')    // High byte is returned and SPDR is loaded with homeflag
+  {                         // in readiness for the 'S' transaction
+    SPI0.DATA = homeFlag;   // sends status of the home position true if at the home position i.e. the sensor has been activated
+  }
+  
+    if (SPIReceipt == 'S')  // Homeflag is returned and SPDR is loaded with zero
+  {                         // in readiness for the next 'A' transaction
+    SPI0.DATA = 0x00;       // fill spdr with 0
+    azcount++;              // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
   }
 
   SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
