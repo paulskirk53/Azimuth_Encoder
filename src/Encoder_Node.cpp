@@ -132,7 +132,7 @@ void setup()
 
   azcount = 0;
 
-  A_Counter = ticksperDomeRev / (360.0 / 261.0); //  the position of due west - 261 for the dome when the scope is at 270.
+  A_Counter = ticksperDomeRev / (360.0 / 261.0); // = 7621 (verified in sheets) the position of due west - 261 for the dome when the scope is at 270.
 
   PowerForCamera(off); // camera power is off by default
                        // delay(15000);            //THIS DELAY is set to give the operator time to open com12 (ASCOM port) to check if the message below arrives tested ok 22/11/21
@@ -303,7 +303,7 @@ void encoder()
     A_Counter = A_Counter - ticksperDomeRev;
   }
 
-  Azimuth = float(A_Counter) / (ticksperDomeRev / 360.0); // (ticks for one dome rev) / 360 (degrees) - about 29
+  Azimuth = float(A_Counter) / (float(ticksperDomeRev) / 360.0); // (ticks for one dome rev) / 360 (degrees) - about 29. float to avoid integer arithmetic
   // i.e number of ticks per degree
 
   // some error checking
