@@ -303,7 +303,7 @@ void encoder()
     A_Counter = A_Counter - ticksperDomeRev;
   }
 
-  Azimuth = float(A_Counter) / (float(ticksperDomeRev) / 360.0); // (ticks for one dome rev) / 360 (degrees) - about 29. float to avoid integer arithmetic
+  Azimuth = float(A_Counter) / (ticksperDomeRev / 360.0); // (ticks for one dome rev) / 360 (degrees) - about 29. float to avoid integer arithmetic
   // i.e number of ticks per degree
 
   // some error checking
