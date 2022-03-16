@@ -123,7 +123,7 @@ void setup()
   // attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
   attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
   // attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
-  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, RISING);
+  attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, FALLING);
 
   // lcd.setCursor(0, 0);
   // lcd.print("Az MCU Ver " + pkversion);                 //16 char display
@@ -277,9 +277,6 @@ void loop()
   } // endif
 
 
-  homeFlag = false;             // this is set true by the westsync interrupt, so at the end of each loop, set it false
-
-
 } // end void loop
 
 void encoder()
@@ -405,6 +402,7 @@ ISR(SPI0_INT_vect) // was this in arduino -> (SPI_STC_vect)
   {                         // in readiness for the next 'A' transaction
     SPI0.DATA = 0x00;       // fill spdr with 0
     azcount++;              // counter is sent to the monitor program as an indication that SPI comms between stepper and encoder are live
+    homeFlag = false;       // now that the homeflag state has been sent to the stepper, reset it
   }
 
   SPI0.INTFLAGS = SPI_IF_bm; /* Clear the Interrupt flag by writing 1 */
