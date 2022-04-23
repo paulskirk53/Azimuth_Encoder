@@ -5,10 +5,6 @@
  Note Note Note Note Note Note Note
 */
 
-// This code has been modified to remove the LCD
-//  and incorporates the Monitor program.
-
-
 //  Name:       Merged-Box-Azimuth_Encoder
 //   Created:  5-10-21
 //   Author:    Paul Kirk
@@ -64,7 +60,6 @@ static void SPI0_init(void);
 
 //
 #define ASCOM Serial
-#define Stepper Serial1
 #define Monitor Serial2
 // encoder:
 // should this be set for 261 degrees? Otherwise the driver will request a move to 261 which will move the aperture out of alignment with the parked dome (and scope)
@@ -105,16 +100,11 @@ void setup()
   pinMode(WestPin, INPUT_PULLUP);
   pinMode(ledPin, OUTPUT);
 
-  // todo - the line below will need uncommenting and change to ensure it acts on the Rx lne for the seril line between Stepper and encoder
-  pinMode(9, INPUT_PULLUP); // SEE THE github comments for this code - it pulls up the Rx line to 5v and transforms the hardware serial2 link's efficiency
-
+    
   //  notes for serial comms -
   ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
-  Stepper.begin(19200); // with stepper MCU - change this to Serial1 when coding for 4809, see google doc - Pin config for Radio Encoder MCU
-  Monitor.begin(19200); // with monitor program Change to Serial2 when coding for 4809,    see google doc - Pin config for Radio Encoder MCU
+  Monitor.begin(19200); // Serial comms with monitor program 
 
-  // set up the LCD's number of columns and rows:
-  // lcd.begin(16, 2);
 
   // encoder:
   pinMode(A_PHASE, INPUT);
@@ -128,10 +118,6 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
   // attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
   attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, FALLING);
-
-  // lcd.setCursor(0, 0);
-  // lcd.print("Az MCU Ver " + pkversion);                 //16 char display
-  // delay(1000);                                   //so the message above can be seen before it is overwritten
 
   azcount = 0;
 
@@ -207,35 +193,16 @@ void loop()
     }   // endif
   }
 
-  if (Stepper.available() > 0) // ser1 is encoder with stepper MCU
-  {
-    encoder();
-    String ReceivedData = "";
-
-    ReceivedData = Stepper.readStringUntil('#');
-    // Serial1.print("received ");
-    // Serial1.println(ReceivedData );
-    if (ReceivedData.indexOf("AZ", 0) > -1)
-    {
-      azcount++;
-      Stepper.print(String(Azimuth) + "#");
-    } // endif
-
-    if (azcount > 250)
-    {
-      azcount = 0;
-    } // endif
-
-  } // endif
+  
 
   if (Monitor.available() > 0) // Monitor is comms with the windows forms arduino monitoring app
   {
     String MonitorData = Monitor.readStringUntil('#');
     //todo remove line below
-     ASCOM.print(MonitorData);
+    // ASCOM.print(MonitorData);
 
-        if (MonitorData.indexOf("encoder", 0) > -1)
-    {
+        if (MonitorData.indexOf("encoder", 0) > -1)  // THIS IS THE MONITOR PROGRAM INTERROGATING TO CHECK IT IS IN COMMS WITH THE CORRECT mcu
+    {                                                // in this case we return encoder# to indicate this is the correct MCU
       Monitor.print("encoder#");
     }
 
