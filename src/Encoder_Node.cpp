@@ -35,9 +35,9 @@
 void encoder();
 
 void interrupt();
-void NorthSync();
+
 void EastSync();
-void SouthSync();
+
 void WestSync();
 bool PowerForCamera(bool State);
 void resetViaSWR();
@@ -114,9 +114,9 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(A_PHASE), interrupt, RISING); // interrupt for the encoder device
 
   // interupts for the azimuth syncs below
-  // attachInterrupt(digitalPinToInterrupt(NorthPin), NorthSync, RISING);
+  
   attachInterrupt(digitalPinToInterrupt(EastPin), EastSync, RISING);
-  // attachInterrupt(digitalPinToInterrupt(SouthPin), SouthSync, RISING);
+  
   attachInterrupt(digitalPinToInterrupt(WestPin), WestSync, FALLING);
 
   azcount = 0;
@@ -304,18 +304,12 @@ void interrupt() // Interrupt function
   } // end else clause
 } // end void interrupt
 
-void NorthSync()
-{
-  A_Counter = 0;
-}
+
 void EastSync()
 {
   A_Counter = ticksperDomeRev / 4.0;
 }
-void SouthSync()
-{
-  A_Counter = ticksperDomeRev / 2.0;
-}
+
 void WestSync()                              //this acts as the home position
 {
   A_Counter = ticksperDomeRev / (360.0 / 261.0);     // set the azimuth to 261 degrees (west)
