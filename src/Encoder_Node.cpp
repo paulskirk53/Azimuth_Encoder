@@ -107,8 +107,8 @@ void setup()
 
 
   // encoder:
-  pinMode(A_PHASE, INPUT);
-  pinMode(B_PHASE, INPUT);
+  pinMode(A_PHASE, INPUT_PULLUP);
+  pinMode(B_PHASE, INPUT_PULLUP);
 
   // pins 2,3,18,19,20,21 are the only pins available to use with interrupts on the mega2560 (no pin limit)restrictions on 4809)
   attachInterrupt(digitalPinToInterrupt(A_PHASE), interrupt, RISING); // interrupt for the encoder device
