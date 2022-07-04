@@ -158,6 +158,8 @@ void loop()
     encoder();
 
     String ReceivedData = "";
+
+    //The code below gives a visual indication of ASCOM - just toggles LED each time an ASCOM request is received
     if (digitalRead(ledPin) == LOW)
     {
       digitalWrite(ledPin, HIGH);
