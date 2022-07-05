@@ -48,7 +48,7 @@ static void SPI0_init(void);
 
 // encoder:
 #define A_PHASE 2 // USES PINS 2 AND 3 for encoder interrupt
-#define B_PHASE 3
+#define B_PHASE 13
 #define NorthPin 18
 #define EastPin 28 // changed for SPI
 #define SouthPin 20
@@ -210,6 +210,9 @@ void loop()
 
     if (MonitorData.indexOf("reset", 0) > -1) //
     {
+      //todo remove two lines below
+      ASCOM.print("resetting");
+      delay(1000);
       resetViaSWR();
     }
 
