@@ -80,7 +80,7 @@ long pkstart = 0;
 just trying to get the value below as close as possible. One full dome rev at ticksperdomerev = 10513 was 2 degrees out - started at 260 and the same point after
 one full rev was 262. Spreadsheet gives 1 degree = 29 ticks (at 10513 per rev), so try reducing by 60 as below.
 */
-float ticksperDomeRev = 10453;  //was 10513 (changed 20/4/22) this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
+float ticksperDomeRev = 25880;  //was 10513 (changed 20/4/22) this was worked out empirically by counting the number of encoder wheel rotations for one dome rev. 11-9-21
 long calltime = 0;
 bool cameraPowerState = off;
 
