@@ -99,8 +99,11 @@ void setup()
   pinMode(SouthPin, INPUT_PULLUP);
   pinMode(WestPin, INPUT_PULLUP);
   pinMode(ledPin, OUTPUT);
-
+  pinMode(CameraPower, OUTPUT);
     
+  //turn the camera power of at startup:
+  digitalWrite (CameraPower, LOW);
+
   //  notes for serial comms -
   ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
   Monitor.begin(19200); // Serial comms with monitor program 
