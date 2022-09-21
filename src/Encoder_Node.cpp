@@ -197,9 +197,9 @@ void loop()
       } // endif
     }   // endif
     // todo - test the code segment below from the DOME driver
-    if (ReceivedData.indexOf( "encoder", 0) >-1)
+    if (ReceivedData.indexOf( "azimuth", 0) >-1)
     {
-       ASCOM.print("encoder#");    // this is to respond to MCU identification query request from the ASCOM DOME driver - used by the driver to identify the ASCOM comport in use
+       ASCOM.print("azimuth#");    // this is to respond to MCU identification query request from the ASCOM DOME driver - used by the driver to identify the ASCOM comport in use
     }
   }
 
