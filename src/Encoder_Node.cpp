@@ -211,7 +211,7 @@ void loop()
     //todo remove line below
     // ASCOM.print(MonitorData);
 
-        if (MonitorData.indexOf("encoder", 0) > -1)  // THIS IS THE MONITOR PROGRAM INTERROGATING TO CHECK IT IS IN COMMS WITH THE CORRECT mcu
+        if (MonitorData.indexOf("monitorencoder", 0) > -1)  // THIS IS THE MONITOR PROGRAM INTERROGATING TO CHECK IT IS IN COMMS WITH THE CORRECT mcu
     {                                                // in this case we return encoder# to indicate this is the correct MCU
       Monitor.print("monitorencoder#");
     }
