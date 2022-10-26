@@ -102,7 +102,7 @@ void setup()
   pinMode(CameraPower, OUTPUT);
     
   //turn the camera power of at startup:
-  digitalWrite (CameraPower, LOW);           //  LOW is camera power OFF
+  digitalWrite (CameraPower, HIGH);           //  HIGH is camera power OFF (new N channel driver for P-Channel high side switch)
 
   //  notes for serial comms -
   ASCOM.begin(19200);   // with ASCOM driver refer to DIP 40 pinout to get correct pin numbers for all the serial ports - see the google doc - 'Pin config for Radio Encoder MCU'
@@ -333,12 +333,12 @@ bool PowerForCamera(bool State)
 {
   if (State)
   {
-    digitalWrite(CameraPower, HIGH);  //
+    digitalWrite(CameraPower, LOW);            //  LOW is camera power ON (new N channel driver for P-Channel high side switch)
     cameraPowerState = on;
   }
   else
   {
-    digitalWrite(CameraPower, LOW); //NB as above
+    digitalWrite(CameraPower, HIGH);           //  HIGH is camera power OFF (new N channel driver for P-Channel high side switch)
     cameraPowerState = off;
   }
 }
